@@ -75,7 +75,7 @@ module.exports = NodeHelper.create({
 		var self = this;
         setInterval(function() {
             self.getData();
-        }, nextLoad); //perform every 1000 milliseconds.
+        }, nextLoad);
     },
 
     socketNotificationReceived: function(notification, payload) {

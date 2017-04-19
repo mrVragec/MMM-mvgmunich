@@ -14,9 +14,8 @@ Module.register("mvgmunich", {
     defaults: {
         maxEntries: 8, // maximum number of results shown on UI
         updateInterval: 1 * 1000 * 60, // update every 60 seconds
-        retryDelay: 5000,
         apiBase: "http://www.mvg-live.de/ims/dfiStaticAnzeige.svc?",
-        haltestelle: "Hauptbahnhof", // detault departure station
+        haltestelle: "Hauptbahnhof", // default departure station
         showUbahn: true, //show ubahn route
         showBus: true, // show bus route
         showTram: true, // show tram route
