@@ -34,9 +34,8 @@ module.exports = NodeHelper.create({
         var sbahn = ((this.config.showSbahn) ? "&sbahn=checked" : "");
 		var urlApi = self.config.apiBase + haltestelle + ubahn + bus + tram + sbahn;
 		var retry = true;
-		var request = require('request');
         request(urlApi, {encoding: 'binary'}, function (error, response, body) {
-            if(response.statusCode == 200 && !error) {
+            if(response.statusCode === 200 && !error) {
                 self.processData(body);
             }
         });
@@ -86,6 +85,6 @@ module.exports = NodeHelper.create({
 		    this.updating = true;
             self.getData();
             self.scheduleUpdate(this.config.updateInterval);
-        };
+        }
     }
 });
