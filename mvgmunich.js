@@ -1,13 +1,13 @@
 /* Timetable for public transport in Munich */
 
 /*
-* Magic Mirror
-* Module: MVG Munich
-*
-* By Simon Crnko
-* MIT Licensed
-*
-*/
+ * Magic Mirror
+ * Module: MVG Munich
+ *
+ * By Simon Crnko
+ * MIT Licensed
+ *
+ */
 
 Module.register("mvgmunich", {
     // Default module configuration
@@ -22,35 +22,35 @@ Module.register("mvgmunich", {
         showSbahn: true, // show sbahn route
     },
 
-    getStyles: function() {
+    getStyles: function () {
         return ["mvgmunich.css"];
     },
 
-    start: function() {
-		Log.info("Starting module: " + this.name);
+    start: function () {
+        Log.info("Starting module: " + this.name);
         this.responseData = this.translate("LOADING");
-		this.sendSocketNotification("GETDATA", this.config);
+        this.sendSocketNotification("GETDATA", this.config);
         this.responseData = "";
         this.updateTimer = null;
-	},
+    },
 
     // Override dom generator.
-	getDom: function() {
+    getDom: function () {
         var wrapperTable = document.createElement("table");
         wrapperTable.className = "small";
         wrapperTable.innerHTML = this.responseData;
-		return wrapperTable;
-	},
+        return wrapperTable;
+    },
 
     // Override getHeader method.
-	getHeader: function() {
-		return this.data.header + " Munich: " + this.config.haltestelle;
-	},
+    getHeader: function () {
+        return this.data.header + " Munich: " + this.config.haltestelle;
+    },
 
-    socketNotificationReceived: function(notification, payload) {
-		if (notification === "UPDATE"){
-			this.responseData = payload;
-			this.updateDom();
-		}
-	}
+    socketNotificationReceived: function (notification, payload) {
+        if (notification === "UPDATE") {
+            this.responseData = payload;
+            this.updateDom();
+        }
+    }
 });
