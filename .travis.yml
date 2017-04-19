@@ -3,7 +3,7 @@ node_js:
   - "7"
   - "6"
 script:
- - npm run lint
+ - npm run
 cache:
   directories:
     - node_modules

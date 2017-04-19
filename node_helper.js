@@ -13,6 +13,7 @@ var NodeHelper = require("node_helper");
 
 var cheerio = require('cheerio');
 var filter = require('array-filter');
+var request = require('request');
 
 module.exports = NodeHelper.create({
 
