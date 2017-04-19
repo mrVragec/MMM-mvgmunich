@@ -73,7 +73,6 @@ module.exports = NodeHelper.create({
         nextLoad = nextLoad;
 		var self = this;
         setInterval(function() {
-            //self.updateDom(); // no speed defined, so it updates instantly.
             self.getData();
         }, nextLoad); //perform every 1000 milliseconds.
     },
