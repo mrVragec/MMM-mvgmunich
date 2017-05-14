@@ -7,11 +7,13 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 
 ## Dependencies
 * instance of [MagicMirror²](https://github.com/MichMich/MagicMirror)
-* cheerio & array-filter (linux: npm install cherio && npm install array-filter)
+* cheerio & array-filter (linux: npm install cheerio && npm install array-filter)
 
 ## Installation
 1. Clone this repository in your MagicMirror installation under modules.
-2. Add configuration block to your config.js:
+2. Rename plugin foler from 'MMM-mvgmunich' to 'mvgmunich'
+3. Install dependencies in main MagicMirror folder 
+4. Add configuration block to your config.js:
 ```
 {
   module: "mvgmunich",

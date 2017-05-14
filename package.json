@@ -1,19 +1,20 @@
 {
-    "name": "mvgmunich",
-    "version": "0.1.0",
+    "name": "MMM-mvgmunich",
+    "version": "1.0.1",
     "description": "",
-    "repository": {
-        "type": "git",
-        "url": ""
-    },
+    "main": "mvgmunivh.js",
+    "author": "Simon Crnko",
+    "license": "MIT",
+    "homepage": "https://github.com/mrVragec/MMM-mvgmunich",
     "keywords": [
         "magic mirror",
         "public transport",
         "mvv",
         "mvg"
     ],
-    "author": "Simon Crnko",
-    "contributors": "",
-    "license": "MIT",
-    "homepage": "https://github.com/mrVragec/MMM-mvgmunich"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mrVragec/MMM-mvgmunich"
+    },
+    "contributors": ""
 }
