@@ -31,10 +31,7 @@ module.exports = NodeHelper.create({
         }
     },
 
-    /* updateTimetable(transports)
-     * Calls processTrains on succesfull response.
-     */
-    getData: function () {
+    getDepartureInfo: function () {
         var self = this;
         var haltestelle = "haltestelle=" + this.config.haltestelle;
         var ubahn = ((this.config.showUbahn) ? "&ubahn=checked" : "");
@@ -46,9 +43,9 @@ module.exports = NodeHelper.create({
         request(urlApi, {
             encoding: 'binary'
         }, function (error, response, body) {
-            if (response.statusCode === 200 && !error) {
-                $ = cheerio.load(body);
+            if (!error && response.statusCode === 200) {
                 var transport = "";
+                $ = cheerio.load(body);
                 $('tr').each(function (i, elem) {
                     if ($(this).html().includes('lineColumn')) {
                         transport += "<tr class='normal'>";
@@ -60,14 +57,54 @@ module.exports = NodeHelper.create({
                     if (i >= self.config.maxEntries) {
                         return false;
                     }
+                    self.sendSocketNotification("UPDATE", transport);
+                });
+                $('div').each(function (i, elem) {
+                    if ($(this).html().includes('Fehler')) {
+                        self.getHaltestelleInfo();
+                    }
+                });
+            }
+            if (error) {
+                self.scheduleUpdate((self.loaded) ? -1 : self.config.retryDelay);
+                // Error while reading departure data ...
+                self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
+            }
+        });
+    },
+
+    getHaltestelleInfo: function () {
+        var self = this;
+        var haltestelle = "haltestelle=" + this.config.haltestelle;
+        request(self.config.errorBase + haltestelle, {
+            encoding: 'binary'
+        }, function (error, response, body) {
+            if (response.statusCode === 200 && !error) {
+                var transport = "";
+                $ = cheerio.load(body);
+                transport += "Station " + self.config.haltestelle + " is not correct, please update your config! <br> Hints for your station are: ";
+                $('li').each(function (i, elem) {
+                    $(this).each(function (j, element) {
+                        transport += "<tr class='normal'><td>";
+                        transport += $(this).text().trim();
+                        transport += "</td></tr>";
+                    });
+
                 });
                 self.sendSocketNotification("UPDATE", transport);
             }
-
             if (error) {
-                self.scheduleUpdate((self.loaded) ? -1 : self.config.retryDelay);
+                // Error while reading departure data ...
+                self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
             }
         });
+    },
+
+    /* updateTimetable(transports)
+     * Calls processTrains on succesfull response.
+     */
+    getData: function () {
+        this.getDepartureInfo();
     },
 
     /* scheduleUpdate()
