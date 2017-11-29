@@ -46,19 +46,36 @@ module.exports = NodeHelper.create({
             if (!error && response.statusCode === 200) {
                 var transport = "";
                 $ = cheerio.load(body);
+                var transportItems = [];
                 $('tr').each(function (i, elem) {
                     if ($(this).html().includes('lineColumn')) {
-                        transport += "<tr class='normal'>";
-                        $(this).each(function (j, element) {
-                            transport += $(this).html().trim();
-                        })
-                        transport += "</tr>";
+                          $(this).each(function (j, element) {
+                              var transportItem = new Object();
+                              var str = $(this).html().trim();
+                              str = $(str).text();
+                              str = str.split("\n");
+                              transportItem.station = str[2].trim();
+                              transportItem.line = str[0].trim();
+                              transportItem.time = str[5].trim();
+                              transportItems.push(transportItem);
+                         })
                     }
-                    if (i >= self.config.maxEntries) {
-                        return false;
-                    }
-                    self.sendSocketNotification("UPDATE", transport);
                 });
+                transportItems.sort(function(a, b) {
+                    return a.time - b.time;
+                })
+                for (var i in transportItems) {
+                    transport += "<tr class='normal'>";
+                    //TODO: add data from item !!!
+                    transport += "<td>" + transportItems[i].line + "</td>";
+                    transport += "<td class='stationColumn'>" + transportItems[i].station + "</td>";
+                    transport += "<td>" + transportItems[i].time + "</td>";
+                    transport += "</tr>";
+                    if (i == self.config.maxEntries-1) {
+                        break;
+                    }
+                }
+                self.sendSocketNotification("UPDATE", transport);
                 $('div').each(function (i, elem) {
                     if ($(this).html().includes('Fehler')) {
                         self.getHaltestelleInfo();
@@ -89,7 +106,6 @@ module.exports = NodeHelper.create({
                         transport += $(this).text().trim();
                         transport += "</td></tr>";
                     });
-
                 });
                 self.sendSocketNotification("UPDATE", transport);
             }
