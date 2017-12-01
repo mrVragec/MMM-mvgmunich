@@ -18,28 +18,29 @@ module.exports = NodeHelper.create({
     start: function () {
         this.updating = false;
         this.started = false;
-        this.config = null;
+        this.config = [];
     },
 
     socketNotificationReceived: function (notification, payload) {
         const self = this;
         if (notification === "GETDATA") {
-            this.config = payload;
+            this.config.push(payload);
             this.updating = true;
-            self.getData();
-            self.scheduleUpdate(this.config.updateInterval);
+            self.getData(payload);
+            self.scheduleUpdate(payload);
         }
     },
 
-    getDepartureInfo: function () {
+    getDepartureInfo: function (config) {
         var self = this;
-        var haltestelle = "haltestelle=" + this.config.haltestelle;
-        var ubahn = ((this.config.showUbahn) ? "&ubahn=checked" : "");
-        var bus = ((this.config.showBus) ? "&bus=checked" : "");
-        var tram = ((this.config.showTram) ? "&tram=checked" : "");
-        var sbahn = ((this.config.showSbahn) ? "&sbahn=checked" : "");
-        var urlApi = self.config.apiBase + haltestelle + ubahn + bus + tram + sbahn;
+        var haltestelle = "haltestelle=" + config.haltestelle;
+        var ubahn = ((config.showUbahn) ? "&ubahn=checked" : "");
+        var bus = ((config.showBus) ? "&bus=checked" : "");
+        var tram = ((config.showTram) ? "&tram=checked" : "");
+        var sbahn = ((config.showSbahn) ? "&sbahn=checked" : "");
+        var urlApi = config.apiBase + haltestelle + ubahn + bus + tram + sbahn;
         var retry = true;
+        //console.log("urlApi: " + urlApi);
         request(urlApi, {
             encoding: 'binary'
         }, function (error, response, body) {
@@ -71,11 +72,12 @@ module.exports = NodeHelper.create({
                     transport += "<td class='stationColumn'>" + transportItems[i].station + "</td>";
                     transport += "<td>" + transportItems[i].time + "</td>";
                     transport += "</tr>";
-                    if (i == self.config.maxEntries-1) {
+                    if (i == config.maxEntries-1) {
                         break;
                     }
                 }
-                self.sendSocketNotification("UPDATE", transport);
+                config.transport = transport;
+                self.sendSocketNotification("UPDATE", config);
                 $('div').each(function (i, elem) {
                     if ($(this).html().includes('Fehler')) {
                         self.getHaltestelleInfo();
@@ -83,7 +85,7 @@ module.exports = NodeHelper.create({
                 });
             }
             if (error) {
-                self.scheduleUpdate((self.loaded) ? -1 : self.config.retryDelay);
+                self.scheduleUpdate((self.loaded) ? -1 : config.retryDelay);
                 // Error while reading departure data ...
                 self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
             }
@@ -119,23 +121,24 @@ module.exports = NodeHelper.create({
     /* updateTimetable(transports)
      * Calls processTrains on succesfull response.
      */
-    getData: function () {
-        this.getDepartureInfo();
+    getData: function (conf) {
+        //console.log("Updating: " + new Date() + " " + conf.haltestelle);
+        this.getDepartureInfo(conf);
     },
 
     /* scheduleUpdate()
      * Schedule next update.
      * argument delay number - Milliseconds before next update. If empty, this.config.updateInterval is used.
      */
-    scheduleUpdate: function (delay) {
+    scheduleUpdate: function (conf) {
         var nextLoad = this.config.updateInterval;
-        if (typeof delay !== "undefined" && delay >= 0) {
-            nextLoad = delay;
+        if (typeof conf.updateInterval !== "undefined" && conf.updateInterval >= 0) {
+            nextLoad = conf.updateInterval;
         }
         nextLoad = nextLoad;
         var self = this;
         setInterval(function () {
-            self.getData();
+            self.getData(conf);
         }, nextLoad);
     }
 });

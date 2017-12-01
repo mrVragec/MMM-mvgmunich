@@ -29,9 +29,11 @@ Module.register("mvgmunich", {
     },
 
     start: function () {
+        this.resultData = [];
         var self = this;
-        Log.info("Starting module: " + this.name);
+        Log.info("Starting module: " + this.name + ", identifier: " + this.identifier);
         this.dataRequest = this.translate("LOADING");
+        this.config.identifier = this.identifier;
         this.getData();
         setInterval(function () {
             self.updateDom();
@@ -43,7 +45,7 @@ Module.register("mvgmunich", {
      * function call getData function in node_helper.js
      *
      */
-    getData: function () {
+    getData: function (identifier) {
         this.sendSocketNotification("GETDATA", this.config);
     },
 
@@ -51,13 +53,15 @@ Module.register("mvgmunich", {
     getDom: function () {
         var wrapperTable = document.createElement("table");
         wrapperTable.className = "small";
-        wrapperTable.innerHTML = this.dataRequest;
+        //Log.log(this.identifier + " "  + this.config.haltestelle + " " + this.resultData[this.config.haltestelle]);
+        wrapperTable.innerHTML = this.resultData[this.config.haltestelle];
+
         return wrapperTable;
     },
 
     processData: function (data) {
-        var self = this;
-        this.dataRequest = data;
+        //Log.log(data.haltestelle + " - " + data.transport);
+        this.resultData[data.haltestelle] = data.transport;
     },
 
     // Override getHeader method.
