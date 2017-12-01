@@ -1,3 +1,6 @@
+## [1.0.3] -
+- change approach how to read data from MVG
+
 ## [1.0.2] - 2017-12-01
 - improve approach how to handle parsed data
 - add sorting of data before showing them on UI

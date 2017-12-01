@@ -52,12 +52,9 @@ module.exports = NodeHelper.create({
                     if ($(this).html().includes('lineColumn')) {
                           $(this).each(function (j, element) {
                               var transportItem = new Object();
-                              var str = $(this).html().trim();
-                              str = $(str).text();
-                              str = str.split("\n");
-                              transportItem.station = str[2].trim();
-                              transportItem.line = str[0].trim();
-                              transportItem.time = str[5].trim();
+                              transportItem.station = $(this).find('td.stationColumn').text().trim();
+                              transportItem.line = $(this).find('td.lineColumn').text().trim();
+                              transportItem.time = $(this).find('td.inMinColumn').text().trim();
                               transportItems.push(transportItem);
                          })
                     }
@@ -67,7 +64,6 @@ module.exports = NodeHelper.create({
                 })
                 for (var i in transportItems) {
                     transport += "<tr class='normal'>";
-                    //TODO: add data from item !!!
                     transport += "<td>" + transportItems[i].line + "</td>";
                     transport += "<td class='stationColumn'>" + transportItems[i].station + "</td>";
                     transport += "<td>" + transportItems[i].time + "</td>";
