@@ -1,6 +1,7 @@
-## [1.0.2] - 2017-11-30
+## [1.0.2] - 2017-12-01
 - improve approach how to handle parsed data
 - add sorting of data before showing them on UI
+- add option to load module more than once
 
 ## [1.0.1] - 2017-05-14
 - add error handling
