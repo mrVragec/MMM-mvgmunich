@@ -31,7 +31,6 @@ Module.register("mvgmunich", {
   start: function() {
     this.resultData = [];
     var self = this;
-    this.dataRequest = this.translate("LOADING");
     this.config.identifier = this.identifier;
     this.getData();
     setInterval(function() {
@@ -57,22 +56,26 @@ Module.register("mvgmunich", {
   },
 
   processData: function(payload) {
-    var transportItems = payload.transportItems;
-    payload.transportItems.sort(function(a, b) {
-      return a.time - b.time;
-    })
-    var transport = "";
-    for (var i in transportItems) {
-      transport += "<tr class='normal'>";
-      transport += "<td>" + transportItems[i].line + "</td>";
-      transport += "<td class='stationColumn'>" + transportItems[i].station + "</td>";
-      transport += "<td>" + transportItems[i].time + "</td>";
-      transport += "</tr>";
-      if (i == this.config.maxEntries - 1) {
-        break;
+    // we have a runner
+    if (payload.error !== "undefined" && payload.error) {
+      this.resultData[payload.uuid] = payload.error;
+      // we have a data object; Just Do Something
+    } else if (payload.transportItems !== "undefined" && payload.transportItems) {
+      var transportItems = payload.transportItems;
+      payload.transportItems.sort(function(a, b) {
+        return a.time - b.time;
+      })
+      var transport = "";
+      for (var i in transportItems) {
+        transport += "<tr class='normal'>";
+        transport += "<td>" + transportItems[i].line + "</td>" + "<td class='stationColumn'>" + transportItems[i].station + "</td>" + "<td>" + transportItems[i].time + "</td>";
+        transport += "</tr>";
+        if (i == this.config.maxEntries - 1) {
+          break;
+        }
       }
+      this.resultData[payload.uuid] = transport;
     }
-    this.resultData[payload.uuid] = transport;
   },
 
   // Override getHeader method.

@@ -24,7 +24,7 @@ module.exports = NodeHelper.create({
   socketNotificationReceived: function(notification, payload) {
     const self = this;
     if (notification === "GETDATA") {
-      this.config[payload.haltestelle] = payload;
+      this.config[payload.identifier] = payload;
       this.updating = true;
 
       var url = payload.apiBase + "haltestelle=" + payload.haltestelle +
@@ -32,7 +32,6 @@ module.exports = NodeHelper.create({
         ((payload.showBus) ? "&bus=checked" : "") +
         ((payload.showTram) ? "&tram=checked" : "") +
         ((payload.showSbahn) ? "&sbahn=checked" : "");
-      //console.log("ident: " + payload.identifier + " url: " + url + " " +payload.identifier);
       self.getData(url, payload.identifier);
       self.scheduleUpdate(url, payload.updateInterval, payload.identifier);
     }
@@ -44,10 +43,9 @@ module.exports = NodeHelper.create({
     request(url, {
       encoding: 'binary'
     }, function(error, response, body) {
+      // if we have response.code == 200 and no error
       if (!error && response.statusCode === 200) {
-        //var transport = "";
         $ = cheerio.load(body);
-        //console.log("body: " + body);
         var transportItems = [];
         $('tr').each(function(i, elem) {
           if ($(this).html().includes('lineColumn')) {
@@ -67,36 +65,45 @@ module.exports = NodeHelper.create({
         });
         $('div').each(function(i, elem) {
           if ($(this).html().includes('Fehler')) {
-            self.getHaltestelleInfo();
+            self.getHaltestelleInfo(identifier);
           }
         });
       }
+      // if error
       if (error) {
-        self.scheduleUpdate((self.loaded) ? -1 : config.retryDelay);
+        self.scheduleUpdate(url, 30000, identifier);
         // Error while reading departure data ...
-        self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
+        // send update request with error and identifier
+        self.sendSocketNotification("UPDATE", {
+          "error": "Error while reading data: " + error.message,
+          "uuid": identifier
+        });
+        return;
       }
     });
   },
 
-  getHaltestelleInfo: function() {
+  getHaltestelleInfo: function(identifier) {
     var self = this;
-    var haltestelle = "haltestelle=" + this.config.haltestelle;
-    request(self.config.errorBase + haltestelle, {
+
+    request(this.config[identifier].errorBase + "haltestelle=" + this.config[identifier].haltestelle, {
       encoding: 'binary'
     }, function(error, response, body) {
+
       if (response.statusCode === 200 && !error) {
         var transport = "";
         $ = cheerio.load(body);
-        transport += "Station " + self.config.haltestelle + " is not correct, please update your config! <br> Hints for your station are: ";
+        transport += "Station " + self.config[identifier].haltestelle + " is not correct, please update your config! <br> Hints for your station are: ";
         $('li').each(function(i, elem) {
           $(this).each(function(j, element) {
-            transport += "<tr class='normal'><td>";
-            transport += $(this).text().trim();
-            transport += "</td></tr>";
+            transport += "<tr class='normal'><td>" + $(this).text().trim() + "</td></tr>";
           });
         });
-        self.sendSocketNotification("UPDATE", transport);
+        // send update request with error message and identifier
+        self.sendSocketNotification("UPDATE", {
+          "error": transport,
+          "uuid": identifier
+        });
       }
       if (error) {
         // Error while reading departure data ...
@@ -114,7 +121,6 @@ module.exports = NodeHelper.create({
 
   /* scheduleUpdate()
    * Schedule next update.
-   * argument delay number - Milliseconds before next update. If empty, this.config.updateInterval is used.
    */
   scheduleUpdate: function(url, updateInterval, identifier) {
     var self = this;
