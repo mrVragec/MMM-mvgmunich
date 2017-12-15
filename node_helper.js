@@ -15,130 +15,117 @@ var request = require('request');
 
 module.exports = NodeHelper.create({
 
-    start: function () {
-        this.updating = false;
-        this.started = false;
-        this.config = [];
-    },
+  start: function() {
+    this.updating = false;
+    this.started = false;
+    this.config = [];
+  },
 
-    socketNotificationReceived: function (notification, payload) {
-        const self = this;
-        if (notification === "GETDATA") {
-            this.config.push(payload);
-            this.updating = true;
-            self.getData(payload);
-            self.scheduleUpdate(payload);
-        }
-    },
+  socketNotificationReceived: function(notification, payload) {
+    const self = this;
+    if (notification === "GETDATA") {
+      this.config[payload.identifier] = payload;
+      this.updating = true;
 
-    getDepartureInfo: function (config) {
-        var self = this;
-        var haltestelle = "haltestelle=" + config.haltestelle;
-        var ubahn = ((config.showUbahn) ? "&ubahn=checked" : "");
-        var bus = ((config.showBus) ? "&bus=checked" : "");
-        var tram = ((config.showTram) ? "&tram=checked" : "");
-        var sbahn = ((config.showSbahn) ? "&sbahn=checked" : "");
-        var urlApi = config.apiBase + haltestelle + ubahn + bus + tram + sbahn;
-        var retry = true;
-        //console.log("urlApi: " + urlApi);
-        request(urlApi, {
-            encoding: 'binary'
-        }, function (error, response, body) {
-            if (!error && response.statusCode === 200) {
-                var transport = "";
-                $ = cheerio.load(body);
-                var transportItems = [];
-                $('tr').each(function (i, elem) {
-                    if ($(this).html().includes('lineColumn')) {
-                          $(this).each(function (j, element) {
-                              var transportItem = new Object();
-                              var str = $(this).html().trim();
-                              str = $(str).text();
-                              str = str.split("\n");
-                              transportItem.station = str[2].trim();
-                              transportItem.line = str[0].trim();
-                              transportItem.time = str[5].trim();
-                              transportItems.push(transportItem);
-                         })
-                    }
-                });
-                transportItems.sort(function(a, b) {
-                    return a.time - b.time;
-                })
-                for (var i in transportItems) {
-                    transport += "<tr class='normal'>";
-                    //TODO: add data from item !!!
-                    transport += "<td>" + transportItems[i].line + "</td>";
-                    transport += "<td class='stationColumn'>" + transportItems[i].station + "</td>";
-                    transport += "<td>" + transportItems[i].time + "</td>";
-                    transport += "</tr>";
-                    if (i == config.maxEntries-1) {
-                        break;
-                    }
-                }
-                config.transport = transport;
-                self.sendSocketNotification("UPDATE", config);
-                $('div').each(function (i, elem) {
-                    if ($(this).html().includes('Fehler')) {
-                        self.getHaltestelleInfo();
-                    }
-                });
-            }
-            if (error) {
-                self.scheduleUpdate((self.loaded) ? -1 : config.retryDelay);
-                // Error while reading departure data ...
-                self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
-            }
-        });
-    },
-
-    getHaltestelleInfo: function () {
-        var self = this;
-        var haltestelle = "haltestelle=" + this.config.haltestelle;
-        request(self.config.errorBase + haltestelle, {
-            encoding: 'binary'
-        }, function (error, response, body) {
-            if (response.statusCode === 200 && !error) {
-                var transport = "";
-                $ = cheerio.load(body);
-                transport += "Station " + self.config.haltestelle + " is not correct, please update your config! <br> Hints for your station are: ";
-                $('li').each(function (i, elem) {
-                    $(this).each(function (j, element) {
-                        transport += "<tr class='normal'><td>";
-                        transport += $(this).text().trim();
-                        transport += "</td></tr>";
-                    });
-                });
-                self.sendSocketNotification("UPDATE", transport);
-            }
-            if (error) {
-                // Error while reading departure data ...
-                self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
-            }
-        });
-    },
-
-    /* updateTimetable(transports)
-     * Calls processTrains on succesfull response.
-     */
-    getData: function (conf) {
-        //console.log("Updating: " + new Date() + " " + conf.haltestelle);
-        this.getDepartureInfo(conf);
-    },
-
-    /* scheduleUpdate()
-     * Schedule next update.
-     * argument delay number - Milliseconds before next update. If empty, this.config.updateInterval is used.
-     */
-    scheduleUpdate: function (conf) {
-        var nextLoad = this.config.updateInterval;
-        if (typeof conf.updateInterval !== "undefined" && conf.updateInterval >= 0) {
-            nextLoad = conf.updateInterval;
-        }
-        nextLoad = nextLoad;
-        var self = this;
-        setInterval(function () {
-            self.getData(conf);
-        }, nextLoad);
+      var url = payload.apiBase + "haltestelle=" + payload.haltestelle +
+        ((payload.showUbahn) ? "&ubahn=checked" : "") +
+        ((payload.showBus) ? "&bus=checked" : "") +
+        ((payload.showTram) ? "&tram=checked" : "") +
+        ((payload.showSbahn) ? "&sbahn=checked" : "");
+      self.getData(url, payload.identifier);
+      self.scheduleUpdate(url, payload.updateInterval, payload.identifier);
     }
+  },
+
+  getDepartureInfo: function(url, identifier) {
+    var self = this;
+    var retry = true;
+    request(url, {
+      encoding: 'binary'
+    }, function(error, response, body) {
+      // if we have response.code == 200 and no error
+      if (!error && response.statusCode === 200) {
+        $ = cheerio.load(body);
+        var transportItems = [];
+        $('tr').each(function(i, elem) {
+          if ($(this).html().includes('lineColumn')) {
+            $(this).each(function(j, element) {
+              var transportItem = new Object();
+              transportItem.station = $(this).find('td.stationColumn').text().trim();
+              transportItem.line = $(this).find('td.lineColumn').text().trim();
+              transportItem.time = $(this).find('td.inMinColumn').text().trim();
+              transportItems.push(transportItem);
+            })
+          }
+        });
+
+        self.sendSocketNotification("UPDATE", {
+          "transportItems": transportItems,
+          "uuid": identifier
+        });
+        $('div').each(function(i, elem) {
+          if ($(this).html().includes('Fehler')) {
+            self.getHaltestelleInfo(identifier);
+          }
+        });
+      }
+      // if error
+      if (error) {
+        self.scheduleUpdate(url, 30000, identifier);
+        // Error while reading departure data ...
+        // send update request with error and identifier
+        self.sendSocketNotification("UPDATE", {
+          "error": "Error while reading data: " + error.message,
+          "uuid": identifier
+        });
+        return;
+      }
+    });
+  },
+
+  getHaltestelleInfo: function(identifier) {
+    var self = this;
+
+    request(this.config[identifier].errorBase + "haltestelle=" + this.config[identifier].haltestelle, {
+      encoding: 'binary'
+    }, function(error, response, body) {
+
+      if (response.statusCode === 200 && !error) {
+        var transport = "";
+        $ = cheerio.load(body);
+        transport += "Station " + self.config[identifier].haltestelle + " is not correct, please update your config! <br> Hints for your station are: ";
+        $('li').each(function(i, elem) {
+          $(this).each(function(j, element) {
+            transport += "<tr class='normal'><td>" + $(this).text().trim() + "</td></tr>";
+          });
+        });
+        // send update request with error message and identifier
+        self.sendSocketNotification("UPDATE", {
+          "error": transport,
+          "uuid": identifier
+        });
+      }
+      if (error) {
+        // Error while reading departure data ...
+        self.sendSocketNotification("UPDATE", 'Error while reading data: ' + error.message);
+      }
+    });
+  },
+
+  /* updateTimetable(transports)
+   * Calls processTrains on succesfull response.
+   */
+  getData: function(url, identifier) {
+    this.getDepartureInfo(url, identifier);
+  },
+
+  /* scheduleUpdate()
+   * Schedule next update.
+   */
+  scheduleUpdate: function(url, updateInterval, identifier) {
+    var self = this;
+    setInterval(function() {
+      self.getData(url, identifier);
+    }, updateInterval);
+  }
 });

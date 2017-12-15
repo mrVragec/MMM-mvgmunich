@@ -1,3 +1,8 @@
+## [1.0.3] - 2017-12-15
+- change approach how to read data from MVG
+- optimize couple of lines
+- change approach of sending data between main js and helper 
+
 ## [1.0.2] - 2017-12-01
 - improve approach how to handle parsed data
 - add sorting of data before showing them on UI
