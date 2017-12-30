@@ -21,7 +21,8 @@ Module.register("mvgmunich", {
     showUbahn: true, //show ubahn route
     showBus: true, // show bus route
     showTram: true, // show tram route
-    showSbahn: true // show sbahn route
+    showSbahn: true, // show sbahn route
+    ignoreStations: []
   },
 
   getStyles: function() {
@@ -67,9 +68,10 @@ Module.register("mvgmunich", {
       })
       var transport = "";
       for (var i in transportItems) {
-        transport += "<tr class='normal'>";
+	transport += "<tr class='normal'>";
         transport += "<td>" + transportItems[i].line + "</td>" + "<td class='stationColumn'>" + transportItems[i].station + "</td>" + "<td>" + transportItems[i].time + "</td>";
         transport += "</tr>";
+
         if (i == this.config.maxEntries - 1) {
           break;
         }

@@ -13,6 +13,8 @@ var cheerio = require('cheerio');
 var filter = require('array-filter');
 var request = require('request');
 
+var ignoreStations = [];
+
 module.exports = NodeHelper.create({
 
   start: function() {
@@ -26,6 +28,8 @@ module.exports = NodeHelper.create({
     if (notification === "GETDATA") {
       this.config[payload.identifier] = payload;
       this.updating = true;
+
+     ignoreStations = payload.ignoreStations;
 
       var url = payload.apiBase + "haltestelle=" + payload.haltestelle +
         ((payload.showUbahn) ? "&ubahn=checked" : "") +
@@ -54,7 +58,10 @@ module.exports = NodeHelper.create({
               transportItem.station = $(this).find('td.stationColumn').text().trim();
               transportItem.line = $(this).find('td.lineColumn').text().trim();
               transportItem.time = $(this).find('td.inMinColumn').text().trim();
-              transportItems.push(transportItem);
+	      
+              if (!ignoreStations.includes(transportItem.station)) {
+                transportItems.push(transportItem);
+              }
             })
           }
         });
