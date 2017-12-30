@@ -27,6 +27,7 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
       showBus: true,    // show bus route
       showTram: true,   // show tram route
       showSbahn: true   // show sbahn route
+      ignoreStations: [] // destination not to be shown
     }
 },
 ```
@@ -41,3 +42,4 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 | `showBus` |Show data for Bus. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
 | `showTram` |Show data for Tram. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
 | `showSbahn` |Show data for S-Bahn. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
+| `ignoreStations` |Ignore destinations based on a array list. <br> **Possible values e.g.:** `["Feldmoching", "Hauptbahnhof"]` <br> **Default** `[]` |
