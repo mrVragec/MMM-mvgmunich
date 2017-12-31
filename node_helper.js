@@ -13,8 +13,6 @@ var cheerio = require('cheerio');
 var filter = require('array-filter');
 var request = require('request');
 
-var ignoreStations = [];
-
 module.exports = NodeHelper.create({
 
   start: function() {
@@ -59,9 +57,7 @@ module.exports = NodeHelper.create({
               transportItem.line = $(this).find('td.lineColumn').text().trim();
               transportItem.time = $(this).find('td.inMinColumn').text().trim();
 	      
-              if (!ignoreStations.includes(transportItem.station)) {
-                transportItems.push(transportItem);
-              }
+              transportItems.push(transportItem);
             })
           }
         });
