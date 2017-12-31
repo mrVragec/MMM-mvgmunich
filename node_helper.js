@@ -27,8 +27,6 @@ module.exports = NodeHelper.create({
       this.config[payload.identifier] = payload;
       this.updating = true;
 
-     ignoreStations = payload.ignoreStations;
-
       var url = payload.apiBase + "haltestelle=" + payload.haltestelle +
         ((payload.showUbahn) ? "&ubahn=checked" : "") +
         ((payload.showBus) ? "&bus=checked" : "") +
