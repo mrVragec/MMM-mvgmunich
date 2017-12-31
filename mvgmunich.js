@@ -4,10 +4,12 @@
  * Magic Mirror
  * Module: MVG Munich
  *
- * By Simon Crnko
+ * By Simon Crnko, Christian Huppertz
  * MIT Licensed
  *
  */
+
+var MS_PER_MINUTE = 60000;
 
 Module.register("mvgmunich", {
   // Default module configuration
@@ -22,7 +24,8 @@ Module.register("mvgmunich", {
     showBus: true, // show bus route
     showTram: true, // show tram route
     showSbahn: true, // show sbahn route
-    ignoreStations: []
+    ignoreStations: [], 
+    timeToWalk: 11
   },
 
   getStyles: function() {
@@ -67,9 +70,18 @@ Module.register("mvgmunich", {
         return a.time - b.time;
       })
       var transport = "";
+      var currentdate = new Date();
+
       for (var i in transportItems) {
-	transport += "<tr class='normal'>";
-        transport += "<td>" + transportItems[i].line + "</td>" + "<td class='stationColumn'>" + transportItems[i].station + "</td>" + "<td>" + transportItems[i].time + "</td>";
+      
+        // format time string
+        var time = new Date(currentdate.valueOf() + transportItems[i].time*MS_PER_MINUTE - this.config.timeToWalk*MS_PER_MINUTE);
+        var hoursStr = (time.getHours() < 10 ? '0' : '') + time.getHours();
+        var minutesStr = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes();
+
+	      transport += "<tr class='normal'>";
+        transport += "<td>" + transportItems[i].line + "</td>" + "<td class='stationColumn'>" + transportItems[i].station + "</td>" + "<td>" + transportItems[i].time + "</td>"
+                  + "<td>" + hoursStr + ":" + minutesStr + "</td>";
         transport += "</tr>";
 
         if (i == this.config.maxEntries - 1) {
