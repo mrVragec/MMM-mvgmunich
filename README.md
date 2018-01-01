@@ -27,6 +27,9 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
       showBus: true,    // show bus route
       showTram: true,   // show tram route
       showSbahn: true   // show sbahn route
+      ignoreStations: [] // destination not to be shown
+      timeToWalk: 10 // 10 min walking time to station. Default is 0
+      includeWalkingTime: false // if the walking time should be included and the starting time is displayed
     }
 },
 ```
@@ -41,3 +44,6 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 | `showBus` |Show data for Bus. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
 | `showTram` |Show data for Tram. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
 | `showSbahn` |Show data for S-Bahn. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
+| `ignoreStations` |Ignore destinations based on a array list. <br> **Possible values e.g.:** `["Feldmoching", "Hauptbahnhof"]` <br> **Default** `[]` |
+| `timeToWalk` | Time to walk to the station from your current location <br> **Default:** `0` minutes |
+| `includeWalkingTime` | If the time to leave should be displayed which includes the walking time. <br> **Default:** `false` |

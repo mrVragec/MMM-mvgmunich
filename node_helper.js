@@ -54,6 +54,7 @@ module.exports = NodeHelper.create({
               transportItem.station = $(this).find('td.stationColumn').text().trim();
               transportItem.line = $(this).find('td.lineColumn').text().trim();
               transportItem.time = $(this).find('td.inMinColumn').text().trim();
+	      
               transportItems.push(transportItem);
             })
           }
