@@ -3,7 +3,7 @@
 MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in Munich - Germany.
 
 ## Example
-![](.github/Example_1.png) ![](.github/Example_2.png)
+![](.github/Example_3.png)
 
 ## Dependencies
 * instance of [MagicMirror²](https://github.com/MichMich/MagicMirror)
