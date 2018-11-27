@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 800 800" enable-background="new 0 0 800 800" xml:space="preserve" width="800px" height="800px">
+<g>
+	<g>
+		<g>
+			<defs>
+				<polyline id="SVGID_1_" points="0,0 0,800 800,800 800,0 				"/>
+			</defs>
+			<clipPath id="SVGID_2_">
+				<use xlink:href="#SVGID_1_"  overflow="visible"/>
+			</clipPath>
+			<polyline clip-path="url(#SVGID_2_)" fill="#0068B0" points="800,800 800,0 0,0 0,800 			"/>
+		</g>
+		<g>
+			<defs>
+				<polyline id="SVGID_3_" points="0,0 0,800 800,800 800,0 				"/>
+			</defs>
+			<clipPath id="SVGID_4_">
+				<use xlink:href="#SVGID_3_"  overflow="visible"/>
+			</clipPath>
+			<path clip-path="url(#SVGID_4_)" fill="#FFFFFF" d="M617.5,473.62V113.07H480.38v352.08c0,67.68-19.46,120.17-80.37,120.17
+				c-64.33,0-80.41-51.59-80.41-120.17V113.07H182.47v360.55c0,136.28,80.4,213.28,217.53,213.28
+				C533.73,686.91,617.5,609.9,617.5,473.62"/>
+		</g>
+	</g>
+</g>
+</svg>
