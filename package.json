@@ -16,5 +16,9 @@
         "type": "git",
         "url": "https://github.com/mrVragec/MMM-mvgmunich"
     },
-    "contributors": ""
+    "contributors": "",
+    "dependencies": {
+        "cheerio":"~1.0.0-rc.2",
+        "array-filter":"~1.0.0"
+        }
 }

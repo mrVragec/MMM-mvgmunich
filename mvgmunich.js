@@ -10,7 +10,6 @@
  */
 
 const MS_PER_MINUTE = 60000;
-
 Module.register("mvgmunich", {
 	// Default module configuration
 	defaults: {
@@ -23,7 +22,10 @@ Module.register("mvgmunich", {
 		haltestelleName: "",
 		ignoreStations: [], // list of destination to be ignored in the list
 		timeToWalk: 0, // walking time to the station
-		includeWalkingTime: false, // if the walking time should be included and the starting time is displayed
+		showWalkingTime: false, // if the walking time should be included and the starting time is displayed
+		showTrainDepartureTime: true,
+		trainDepartureTimeFormat: "relative",
+		walkingTimeFormat: "relative",
 		showIcons: true,
 		transportTypesToShow: {
 			"ubahn": true,
@@ -99,22 +101,58 @@ Module.register("mvgmunich", {
 				continue;
 			}
 
-			var timingForCurrentTrain = Math.floor((new Date(apiResultItem.departureTime).getTime() - new Date().getTime()) / 1000 / 60);
-
 			this.htmlText += "<tr class='normal'>";
-			// check if user want's icons or not
+			// check if user wants icons 
 			if (this.config.showIcons) {
-				htmlText += "<td class='" + apiResultItem.product.toLocaleLowerCase() + "'>" + apiResultItem.label + "</td>";
-			} else {
-				htmlText += "<td>" + apiResultItem.label + "</td>";
-			}
+				htmlText += "<td class='" + apiResultItem.product.toLocaleLowerCase() + "'></td>";
+			} 
+			// add transport number
+			htmlText += "<td>" + apiResultItem.label + "</td>";
+			
+			// add last station aka direction
 			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
-			htmlText += "<td class='timing'>" +
-				(timingForCurrentTrain <= 0 ? this.translate("JETZT") : this.translate("IN") +
-					" " + timingForCurrentTrain + " " + this.translate("MIN")
-				) + "</td>";
-			htmlText += "</tr>";
+			
+			if(this.config.showTrainDepartureTime) {
+				// add departure time
+				htmlText += "<td class='timing'>";
+				var departureTime = new Date(apiResultItem.departureTime)
 
+				// check what kind of time user wants (absolute / relative)		
+				if(this.config.trainDepartureTimeFormat == "absolute") {
+					htmlText += (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours() 
+								+ ":" + (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
+				} else if (this.config.trainDepartureTimeFormat == "relative") {
+					var timingForCurrentTrain = Math.floor((departureTime.getTime() - new Date().getTime()) / 1000 / 60);
+					htmlText +=	(timingForCurrentTrain <= 0 
+						? this.translate("JETZT") 
+						: this.translate("IN") + " " + timingForCurrentTrain + " " + this.translate("MIN"));
+				} else {
+					htmlText += "trainDepartureTimeFormat config is wrong"
+				}
+				htmlText +=  "</td>";
+			}
+			// check if user want's to see walking time
+			if (this.config.showWalkingTime) {
+				htmlText += "<td> / ";
+				var startWalkingTime = new Date(apiResultItem.departureTime
+					- this.config.timeToWalk * MS_PER_MINUTE);
+				// check what kind of walking time user wants (absolute / relative)
+				if(this.config.walkingTimeFormat == "absolute") {
+						var hoursStr = (startWalkingTime.getHours() < 10 ? '0' : '') + startWalkingTime.getHours();
+						var minutesStr = (startWalkingTime.getMinutes() < 10 ? '0' : '') + startWalkingTime.getMinutes();
+						// add walking time timing
+						htmlText += hoursStr + ":" + minutesStr;
+				} else if (this.config.walkingTimeFormat == "relative") {
+					var timingForStartWalking = Math.floor((startWalkingTime.getTime() - new Date().getTime()) / 1000 / 60);
+					htmlText += (timingForStartWalking <=0 
+						? this.translate("JETZT") 
+						: this.translate("IN") + " " + timingForStartWalking + " " + this.translate("MIN"));
+				} else {
+					htmlText += "walkingTimeFormat config is wrong"
+				}
+				htmlText += "</td>";
+			}
+			htmlText += "</tr>";
 			noOfItems++;
 			if (noOfItems == this.config.maxEntries) {
 				break;
