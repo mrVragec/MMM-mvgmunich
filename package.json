@@ -1,8 +1,8 @@
 {
     "name": "MMM-mvgmunich",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "",
-    "main": "mvgmunivh.js",
+    "main": "mvgmunich.js",
     "author": "Simon Crnko",
     "license": "MIT",
     "homepage": "https://github.com/mrVragec/MMM-mvgmunich",
@@ -16,5 +16,9 @@
         "type": "git",
         "url": "https://github.com/mrVragec/MMM-mvgmunich"
     },
-    "contributors": ""
+    "contributors": "",
+    "dependencies": {
+        "cheerio":"~1.0.0-rc.2",
+        "array-filter":"~1.0.0"
+        }
 }
