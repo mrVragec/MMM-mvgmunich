@@ -7,7 +7,7 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 
 ## Dependencies
 * instance of [MagicMirror²](https://github.com/MichMich/MagicMirror)
-* cheerio & array-filter (linux: npm install cheerio && npm install array-filter)
+* urlencode (linux: npm install urlencode)
 
 ## Installation
 1. Clone this repository in your MagicMirror installation under modules.
@@ -34,8 +34,8 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
       timeToWalk: 10,             // 10 min walking time to station. Default is 0
       showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
       showTrainDepartureTime: true,     // show tran departure time
-      trainDepartureTimeFormat: "relative",   // format of the train departure time  
-		  walkingTimeFormat: "relative",    // format of the walking time
+      trainDepartureTimeFormat: "relative",   // format of the train departure time
+      walkingTimeFormat: "relative",    // format of the walking time
     }
 },
 ```

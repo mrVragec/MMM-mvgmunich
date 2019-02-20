@@ -1,6 +1,6 @@
 {
     "name": "MMM-mvgmunich",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "description": "",
     "main": "mvgmunich.js",
     "author": "Simon Crnko",
@@ -18,7 +18,6 @@
     },
     "contributors": "",
     "dependencies": {
-        "cheerio":"~1.0.0-rc.2",
-        "array-filter":"~1.0.0"
+        "urlencode":"~1.1.0"
         }
 }

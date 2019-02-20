@@ -1,3 +1,7 @@
+## [1.0.5] - 2019-02-20
+- fix bug #20 - Stations containing Umlauts are no more recognized
+- fix code climate reported issues
+
 ## [1.0.4] - 2018-11-27
 - change data source URL
 - add icons for transport type
