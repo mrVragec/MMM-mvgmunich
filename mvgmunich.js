@@ -86,9 +86,8 @@ Module.register("mvgmunich", {
 
 	getHtml: function(jsonObject) {
 		var htmlText = "";
-		var noOfItems = 0;
 
-		for (var i = 0, len = jsonObject.departures.length; i < len; i++) {
+		for (var i = 0, len = jsonObject.departures.length; i < this.config.maxEntries; i++) {
 			// get one item from api result
 			var apiResultItem = jsonObject.departures[i];
 			// get transport type
@@ -101,65 +100,80 @@ Module.register("mvgmunich", {
 				continue;
 			}
 
-			this.htmlText += "<tr class='normal'>";
-			// check if user wants icons 
-			if (this.config.showIcons) {
-				htmlText += "<td class='" + apiResultItem.product.toLocaleLowerCase() + "'></td>";
-			} 
+			htmlText += "<tr class='normal'>";
+			// check if user want's icons 
+			htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
 			// add transport number
 			htmlText += "<td>" + apiResultItem.label + "</td>";
-			
 			// add last station aka direction
 			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
-			
-			if(this.config.showTrainDepartureTime) {
-				// add departure time
-				htmlText += "<td class='timing'>";
-				var departureTime = new Date(apiResultItem.departureTime)
-
-				// check what kind of time user wants (absolute / relative)		
-				if(this.config.trainDepartureTimeFormat == "absolute") {
-					htmlText += (departureTime.getHours() < 10 ? '0' : '') + departureTime.getHours() 
-								+ ":" + (departureTime.getMinutes() < 10 ? '0' : '') + departureTime.getMinutes();
-				} else if (this.config.trainDepartureTimeFormat == "relative") {
-					var timingForCurrentTrain = Math.floor((departureTime.getTime() - new Date().getTime()) / 1000 / 60);
-					htmlText +=	(timingForCurrentTrain <= 0 
-						? this.translate("JETZT") 
-						: this.translate("IN") + " " + timingForCurrentTrain + " " + this.translate("MIN"));
-				} else {
-					htmlText += "trainDepartureTimeFormat config is wrong"
-				}
-				htmlText +=  "</td>";
-			}
+			// check if user want's to see departure time
+			htmlText += this.showDepartureTime(apiResultItem.departureTime, this.config);
 			// check if user want's to see walking time
-			if (this.config.showWalkingTime) {
-				htmlText += "<td> / ";
-				var startWalkingTime = new Date(apiResultItem.departureTime
-					- this.config.timeToWalk * MS_PER_MINUTE);
-				// check what kind of walking time user wants (absolute / relative)
-				if(this.config.walkingTimeFormat == "absolute") {
-						var hoursStr = (startWalkingTime.getHours() < 10 ? '0' : '') + startWalkingTime.getHours();
-						var minutesStr = (startWalkingTime.getMinutes() < 10 ? '0' : '') + startWalkingTime.getMinutes();
-						// add walking time timing
-						htmlText += hoursStr + ":" + minutesStr;
-				} else if (this.config.walkingTimeFormat == "relative") {
-					var timingForStartWalking = Math.floor((startWalkingTime.getTime() - new Date().getTime()) / 1000 / 60);
-					htmlText += (timingForStartWalking <=0 
-						? this.translate("JETZT") 
-						: this.translate("IN") + " " + timingForStartWalking + " " + this.translate("MIN"));
-				} else {
-					htmlText += "walkingTimeFormat config is wrong"
-				}
-				htmlText += "</td>";
-			}
+			htmlText += this.showWalkingTime(apiResultItem.departureTime);
 			htmlText += "</tr>";
-			noOfItems++;
-			if (noOfItems == this.config.maxEntries) {
-				break;
-			}
 		}
 
 		return htmlText;
+	},
+
+	showIcons(product, showIcons) {
+		// if (Object.is(showIcons, true)) {
+		if(showIcons) 
+			return "<td class='" + product.toLocaleLowerCase() + "'></td>";
+		return "";
+	},
+
+	showWalkingTime: function (departureTime) {
+		var htmlText = "";
+		if (this.config.showWalkingTime) {
+			htmlText += "<td> / ";
+			var startWalkingTime = new Date(departureTime - this.config.timeToWalk * MS_PER_MINUTE);
+			// check what kind of walking time user wants (absolute / relative)
+			if(this.config.walkingTimeFormat == "absolute") {
+					htmlText += this.getAbsoluteTime(startWalkingTime);
+			} else if (this.config.walkingTimeFormat == "relative") {
+				htmlText += this.getRelativeTime(startWalkingTime);
+			} else {
+				htmlText += "walkingTimeFormat config is wrong"
+			}
+			htmlText += "</td>";
+		}
+		return htmlText;
+	},
+
+	showDepartureTime: function (departureTime, config) {
+		var htmlText = "";
+		if(config.showTrainDepartureTime) {
+			// add departure time
+			htmlText += "<td class='timing'>";
+			var departureTime = new Date(departureTime)
+
+			// check what kind of time user wants (absolute / relative)		
+			if(config.trainDepartureTimeFormat == "absolute") {
+				htmlText += this.getAbsoluteTime(departureTime);
+			} else if (config.trainDepartureTimeFormat == "relative") {
+				htmlText += this.getRelativeTime(departureTime);
+			} else {
+				htmlText += "trainDepartureTimeFormat config is wrong"
+			}
+			htmlText +=  "</td>";
+		}
+		return htmlText;
+	},
+
+	getAbsoluteTime: function(time) {
+		var hoursStr = (time.getHours() < 10 ? '0' : '') + time.getHours();
+		var minutesStr = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes();
+
+		return hoursStr + ":" + minutesStr;
+	},
+
+	getRelativeTime: function(time) {
+		var timingForStartWalking = Math.floor((time.getTime() - new Date().getTime()) / 1000 / 60);
+		return (timingForStartWalking <=0
+			? this.translate("JETZT") 
+			: this.translate("IN") + " " + timingForStartWalking + " " + this.translate("MIN"));
 	},
 
 	// Override getHeader method.

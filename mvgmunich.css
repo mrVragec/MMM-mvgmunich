@@ -15,32 +15,28 @@
 
 .mvgmunich td.tram {
     background: url(resources/tram.svg) no-repeat 0 0;
-    width: 60px;
-    text-align: right;
+    width: 30px;
     padding-bottom: 5px;
     background-size: 25px;
 }
 
 .mvgmunich td.sbahn {
     background: url(resources/s-bahn.svg) no-repeat 0 0;
-    width: 60px;
-    text-align: right;
+    width: 30px;
     padding-bottom: 5px;
     background-size: 25px;
 }
 
 .mvgmunich td.bus {
     background: url(resources/bus.svg) no-repeat 0 0;
-    width: 60px;
-    text-align: right;
+    width: 30px;
     padding-bottom: 5px;
     background-size: 25px;
 }
 
 .mvgmunich td.ubahn {
     background: url(resources/u-bahn.svg) no-repeat 0 0;
-    width: 60px;
-    text-align: right;
+    width: 30px;
     padding-bottom: 5px;
     background-size: 25px;
 }
