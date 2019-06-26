@@ -101,7 +101,7 @@ Module.register("mvgmunich", {
 			}
 
 			htmlText += "<tr class='normal'>";
-			// check if user want's icons 
+			// check if user want's icons
 			htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
 			// add transport number
 			htmlText += "<td>" + apiResultItem.label + "</td>";
@@ -119,7 +119,7 @@ Module.register("mvgmunich", {
 
 	showIcons(product, showIcons) {
 		// if (Object.is(showIcons, true)) {
-		if(showIcons) 
+		if(showIcons)
 			return "<td class='" + product.toLocaleLowerCase() + "'></td>";
 		return "";
 	},
@@ -149,7 +149,7 @@ Module.register("mvgmunich", {
 			htmlText += "<td class='timing'>";
 			var departureTime = new Date(departureTime)
 
-			// check what kind of time user wants (absolute / relative)		
+			// check what kind of time user wants (absolute / relative)
 			if(config.trainDepartureTimeFormat == "absolute") {
 				htmlText += this.getAbsoluteTime(departureTime);
 			} else if (config.trainDepartureTimeFormat == "relative") {
@@ -172,7 +172,7 @@ Module.register("mvgmunich", {
 	getRelativeTime: function(time) {
 		var timingForStartWalking = Math.floor((time.getTime() - new Date().getTime()) / 1000 / 60);
 		return (timingForStartWalking <=0
-			? this.translate("JETZT") 
+			? this.translate("JETZT")
 			: this.translate("IN") + " " + timingForStartWalking + " " + this.translate("MIN"));
 	},
 
@@ -198,7 +198,6 @@ Module.register("mvgmunich", {
 			this.updateDom();
 		}
 		if (notification === "STATION") {
-			console.log("Payload: " + payload);
 			this.config.haltestelleName = payload.name;
 			this.config.haltestelleId = payload.id
 			this.sendSocketNotification("GETDATA", this.config);
