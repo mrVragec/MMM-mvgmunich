@@ -17,6 +17,7 @@ Module.register("mvgmunich", {
 		updateInterval: MS_PER_MINUTE, // update every 60 seconds
 		apiBase: "https://www.mvg.de/fahrinfo/api/departure/",
 		stationQuery: "https://www.mvg.de/fahrinfo/api/location/queryWeb?q=",
+		interruptionsURL: "https://www.mvg.de/.rest/betriebsaenderungen/api/interruptions?_=1550777673738",
 		haltestelle: "Hauptbahnhof", // default departure station
 		haltestelleId: 0,
 		haltestelleName: "",
@@ -27,6 +28,10 @@ Module.register("mvgmunich", {
 		trainDepartureTimeFormat: "relative",
 		walkingTimeFormat: "relative",
 		showIcons: true,
+		showInterruptions: false,
+		showInterruptionsDetails: true,
+		interruptionsDetailsRotateInterval: MS_PER_MINUTE, // time in seconds
+		interruptionsFilter: { },
 		transportTypesToShow: {
 			"ubahn": true,
 			"sbahn": true,
@@ -55,6 +60,12 @@ Module.register("mvgmunich", {
 		setInterval(function() {
 			self.updateDom();
 		}, this.config.updateInterval);
+
+		if(this.config.showInterruptions) {
+			setInterval(function() {
+				self.updateDom();
+			}, this.config.interruptionsDetailsRotateTime);
+		}
 	},
 
 	/*
@@ -64,61 +75,92 @@ Module.register("mvgmunich", {
 	getData: function() {
 		// get first stationId based on station name
 		this.sendSocketNotification("GETSTATION", this.config);
+		this.sendSocketNotification("GETINTERRUPTIONSDATA", this.config);
 	},
 
 	// Override dom generator.
 	getDom: function() {
-		var wrapperTable = document.createElement("div");
+		var wrapper = document.createElement("div");
 		if (this.config.haltestelle === "") {
-			wrapperTable.className = "dimmed light small";
-			wrapperTable.innerHTML = "Please set value for 'Haltestelle'.";
+			wrapper.className = "dimmed light small";
+			wrapper.innerHTML = "Please set value for 'Haltestelle'.";
+			return wrapper;
 		}
 		if (!this.loaded) {
-			wrapperTable.className = "dimmed light small";
-			wrapperTable.innerHTML = "Loading data from MVG ...";
-			return wrapperTable;
+			wrapper.className = "dimmed light small";
+			wrapper.innerHTML = "Loading data from MVG ...";
+			return wrapper;
 		}
-		var wrapperTable = document.createElement("table");
-		wrapperTable.className = "small";
-		wrapperTable.innerHTML = this.dataRequest;
-		return wrapperTable;
+		var contentTable = document.createElement("table");
+		contentTable.className = "small";
+		contentTable.innerHTML = this.dataRequest;
+		wrapper.appendChild(contentTable);
+		if(this.config.showInterruptions) {
+			var interruptions = document.createElement("div");
+			interruptions.className = "interruptions small";
+			interruptions.innerHTML = this.interruptionsData;
+			wrapper.appendChild(interruptions);
+		}
+		return wrapper;
 	},
 
-	getHtml: function(jsonObject) {
+	getHtml: function(jsonObject, tag) {
 		var htmlText = "";
 
-		for (var i = 0, len = jsonObject.departures.length; i < this.config.maxEntries; i++) {
-			// get one item from api result
-			var apiResultItem = jsonObject.departures[i];
-			// get transport type
-			var transportType = apiResultItem.product.toLocaleLowerCase();
-
-			// check if we should show data of this transport type
-			// check if current station is not part of the ignore list
-			if (!this.config.transportTypesToShow[transportType] ||
-				this.config.ignoreStations.includes(apiResultItem.destination)) {
-				continue;
+		if(tag === "IR") {
+			var ubahn = "";
+			var tram = "";
+			var bus = "";
+			var sbahn = "";
+			for (var i = 0; i < jsonObject.affectedLines.line.length; i++) {
+				var apiResultItem = jsonObject.affectedLines.line[i];
+				console.log(apiResultItem.line);
+				if(apiResultItem.product === "U") {
+					ubahn += " " + apiResultItem.line;
+				} else if(apiResultItem.product === "T") {
+					tram += " " + apiResultItem.line;
+				} else if(apiResultItem.product === "B") {
+					bus +=  " " + apiResultItem.line;
+				}
 			}
+			htmlText = "<table class='interruptions'>" + 
+			"<tr><td class='ubahn'></td><td>" +  ubahn + "</td></tr>" +
+			"<tr><td class='tram'></td><td>" + tram + "</td></tr>" +
+			"<tr><td class='bus'></td><td>" + bus + "</td></tr></table>";
+		} else {
+			for (var i = 0; i < this.config.maxEntries; i++) {
+				// get one item from api result
+				var apiResultItem = jsonObject.departures[i];
+				if(apiResultItem === undefined)
+					continue;
+				// get transport type
+				var transportType = apiResultItem.product.toLocaleLowerCase();
 
-			htmlText += "<tr class='normal'>";
-			// check if user want's icons 
-			htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
-			// add transport number
-			htmlText += "<td>" + apiResultItem.label + "</td>";
-			// add last station aka direction
-			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
-			// check if user want's to see departure time
-			htmlText += this.showDepartureTime(apiResultItem.departureTime, this.config);
-			// check if user want's to see walking time
-			htmlText += this.showWalkingTime(apiResultItem.departureTime);
-			htmlText += "</tr>";
+				// check if we should show data of this transport type
+				// check if current station is not part of the ignore list
+				if (!this.config.transportTypesToShow[transportType] ||
+					this.config.ignoreStations.includes(apiResultItem.destination)) {
+					continue;
+				}
+
+				htmlText += "<tr class='normal'>";
+				// check if user want's icons 
+				htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
+				// add transport number
+				htmlText += "<td>" + apiResultItem.label + "</td>";
+				// add last station aka direction
+				htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
+				// check if user want's to see departure time
+				htmlText += this.showDepartureTime(apiResultItem.departureTime, this.config);
+				// check if user want's to see walking time
+				htmlText += this.showWalkingTime(apiResultItem.departureTime);
+				htmlText += "</tr>";
+			}
 		}
-
 		return htmlText;
 	},
 
 	showIcons(product, showIcons) {
-		// if (Object.is(showIcons, true)) {
 		if(showIcons) 
 			return "<td class='" + product.toLocaleLowerCase() + "'></td>";
 		return "";
@@ -183,7 +225,13 @@ Module.register("mvgmunich", {
 
 	socketNotificationReceived: function(notification, payload) {
 		if (notification === "UPDATE") {
-			this.dataRequest = this.getHtml(payload);
+			this.dataRequest = this.getHtml(payload, "");
+			this.loaded = true;
+			this.updateDom();
+		}
+		if (notification === "UPDATE2") {
+			console.log(payload);
+			this.interruptionsData = this.getHtml(payload, "IR");
 			this.loaded = true;
 			this.updateDom();
 		}
@@ -198,10 +246,9 @@ Module.register("mvgmunich", {
 			this.updateDom();
 		}
 		if (notification === "STATION") {
-			console.log("Payload: " + payload);
 			this.config.haltestelleName = payload.name;
 			this.config.haltestelleId = payload.id
-			this.sendSocketNotification("GETDATA", this.config);
+			this.sendSocketNotification("GETMAINDATA", this.config);
 		}
 	}
 });

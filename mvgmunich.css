@@ -6,7 +6,7 @@
  *
  */
 
-.stationColumn {
+ .stationColumn {
     color: white;
     padding-left: 10px;
     padding-right: 10px;
@@ -43,4 +43,9 @@
 
 .mvgmunich td.timing {
     text-align: right;
+}
+
+.mvgmunich table.interruptions {
+    padding-top: 5px;
+    border-top: 1px solid #666;
 }

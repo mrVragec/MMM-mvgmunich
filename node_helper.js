@@ -30,9 +30,13 @@ module.exports = NodeHelper.create({
 	socketNotificationReceived: function(notification, payload) {
 		const self = this;
 		this.config = payload;
-		if (notification === "GETDATA") {
+		if (notification === "GETMAINDATA") {
 			self.getDepartureInfo();
-			self.scheduleUpdate(this.config.updateInterval);
+			self.scheduleUpdate("GETMAINDATA", this.config.updateInterval);
+		}
+		if (notification === "GETINTERRUPTIONSDATA") {
+			self.getInterruptionsInfo();
+			self.scheduleUpdate("GETINTERRUPTIONSDATA", this.config.interruptionsDetailsRotateInterval)
 		}
 		if (notification === "GETSTATION") {
 			self.getStationInfo();
@@ -55,6 +59,25 @@ module.exports = NodeHelper.create({
 				// body is the decompressed response body
 				var jsonObject = JSON.parse(body);
 				self.sendSocketNotification("UPDATE", jsonObject);
+			}
+		});
+	},
+
+	getInterruptionsInfo: function() {
+		var self = this;
+
+		request({
+			headers: globals,
+			uri: self.config.interruptionsURL,
+			method: "GET",
+			gzip: true
+		}, function(error, response, body) {
+			if (error) {
+
+			} else {
+				// body is the decompressed response body
+				var jsonObject = JSON.parse(body);
+				self.sendSocketNotification("UPDATE2", jsonObject);
 			}
 		});
 	},
@@ -90,15 +113,27 @@ module.exports = NodeHelper.create({
 	 * Schedule next update.
 	 * argument delay number - Milliseconds before next update. If empty, this.config.updateInterval is used.
 	 */
-	scheduleUpdate: function(delay) {
-		var nextLoad = this.config.updateInterval;
-		if (typeof delay !== "undefined" && delay >= 0) {
-			nextLoad = delay;
+	scheduleUpdate: function(type, delay) {
+		if(type === "GETMAINDATA") {
+			var nextLoad = this.config.updateInterval;
+			if (typeof delay !== "undefined" && delay >= 0) {
+				nextLoad = delay;
+			}
+			nextLoad = nextLoad;
+			var self = this;
+			setInterval(function() {
+				self.getDepartureInfo();
+			}, nextLoad);
+		} else if (type === "GETINTERRUPTIONSDATA") {
+			var nextLoad = this.config.interruptionsDetailsRotateInterval;
+			if (typeof delay !== "undefined" && delay >= 0) {
+				nextLoad = delay;
+			}
+			nextLoad = nextLoad;
+			var self = this;
+			setInterval(function() {
+				self.getInterruptionsInfo();
+			}, nextLoad);
 		}
-		nextLoad = nextLoad;
-		var self = this;
-		setInterval(function() {
-			self.getDepartureInfo();
-		}, nextLoad);
 	}
 });
