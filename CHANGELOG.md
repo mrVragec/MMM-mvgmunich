@@ -1,3 +1,6 @@
+## [1.0.6] - 2019-09-17
+- add option to show route for regional bus
+
 ## [1.0.5] - 2019-02-20
 - fix bug #20 - Stations containing Umlauts are no more recognized
 - fix code climate reported issues

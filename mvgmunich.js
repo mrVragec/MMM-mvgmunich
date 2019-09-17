@@ -30,6 +30,7 @@ Module.register("mvgmunich", {
 		transportTypesToShow: {
 			"ubahn": true,
 			"sbahn": true,
+			"regional_bus": true,
 			"bus": true,
 			"tram": true
 		}
