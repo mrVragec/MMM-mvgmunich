@@ -10,13 +10,14 @@
  */
 
 const MS_PER_MINUTE = 60000;
+const mvgAPI = "https://www.mvg.de/api";
 Module.register("mvgmunich", {
 	// Default module configuration
 	defaults: {
 		maxEntries: 8, // maximum number of results shown on UI
 		updateInterval: MS_PER_MINUTE, // update every 60 seconds
-		apiBase: "https://www.mvg.de/fahrinfo/api/departure/",
-		stationQuery: "https://www.mvg.de/fahrinfo/api/location/queryWeb?q=",
+		apiBase: mvgAPI + "/fahrinfo/departure/",
+		stationQuery: mvgAPI + "/fahrinfo/location/queryWeb?q=",
 		haltestelle: "Hauptbahnhof", // default departure station
 		haltestelleId: 0,
 		haltestelleName: "",
