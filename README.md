@@ -10,7 +10,7 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 * urlencode (linux: npm install urlencode)
 
 ## Installation
-1. Clone this repository in your MagicMirror installation under modules.
+1. Clone this repository in your MagicMirror installation into the folder modules.
 2. Rename plugin foler from 'MMM-mvgmunich' to 'mvgmunich'
 3. Install dependencies in main MagicMirror folder
 4. Add configuration block to your config.js:
@@ -28,7 +28,7 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
         "ubahn": true,            // show ubahn route
         "sbahn": true,            // show sbahn route
         "bus": true,              // show bus route
-        "regional_bus": true      // show regional bus route
+        "regional_bus": true,     // show regional bus route
         "tram": true              // show tram route
       },
       ignoreStations: [],         // destination not to be shown
@@ -44,7 +44,7 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 ## Config Options
 | **Option**        | **Description** |
 | --- | --- |
-| `haltestelle`     | Station for which you want to display data. <br> **Default:** `Hauprbanhof` <br> **Source:** http://www.mvg-live.de/MvgLive/MvgLive.jsp |
+| `haltestelle`     | Station for which you want to display data. <br> **Default:** `Hauptbahnhof` <br> **Source:** http://www.mvg-live.de/MvgLive/MvgLive.jsp |
 | `maxEntries`      | Number of items shown in table. <br> **Default:** `8` |
 | `updateInterval`  | Update interval <br> **Default:** `60000` |
 | `ubahn`           | Show data for U-Bahn. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
