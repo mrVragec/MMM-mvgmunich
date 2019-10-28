@@ -108,7 +108,7 @@ Module.register("mvgmunich", {
 			// add transport number
 			htmlText += "<td>" + apiResultItem.label + "</td>";
 			// add last station aka direction
-			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
+			htmlText += "<td class='stationColumn'>" + apiResultItem.destination.split(" - ")[0] + "</td>";
 			// check if user want's to see departure time
 			htmlText += this.showDepartureTime(apiResultItem.departureTime, this.config);
 			// check if user want's to see walking time
