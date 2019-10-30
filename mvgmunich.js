@@ -37,63 +37,71 @@ Module.register("mvgmunich", {
 		}
 	},
 
-	getStyles: function() {
+	getStyles: function () {
 		return ["mvgmunich.css"];
 	},
 
 	// Load translations files
-	getTranslations: function() {
+	getTranslations: function () {
 		return {
 			en: "translations/en.json",
 			de: "translations/de.json"
 		};
 	},
 
-	start: function() {
-		var self = this;
-		Log.info("Starting module: " + this.name);
-		this.loaded = false;
-		this.getData();
-		setInterval(function() {
-			self.updateDom();
-		}, this.config.updateInterval);
+	start: function () {
+		this.resultData = [];
+		Log.info("Starting module: " + this.name + ", identifier: " + this.identifier);
+		if (this.config.haltestelle !== "") {
+			this.sendSocketNotification("GET_STATION_INFO", this.config);
+		}
 	},
 
 	/*
 	 * getData
 	 * function call getData function in node_helper.js
+	 *
 	 */
-	getData: function() {
-		// get first stationId based on station name
-		this.sendSocketNotification("GETSTATION", this.config);
+	getData: function () {
+		const self = this;
+		setInterval(function () {
+			self.sendSocketNotification("GET_DEPARTURE_DATA", self.config);
+		}, self.config.updateInterval);
 	},
 
 	// Override dom generator.
-	getDom: function() {
-		var wrapperTable = document.createElement("div");
+	getDom: function () {
+		let wrapperTable = document.createElement("div");
 		if (this.config.haltestelle === "") {
 			wrapperTable.className = "dimmed light small";
 			wrapperTable.innerHTML = "Please set value for 'Haltestelle'.";
+			return wrapperTable;
 		}
-		if (!this.loaded) {
+		// console.log("this.resultData: {}", this.resultData);
+		if (this.resultData === []) {
 			wrapperTable.className = "dimmed light small";
 			wrapperTable.innerHTML = "Loading data from MVG ...";
 			return wrapperTable;
 		}
-		var wrapperTable = document.createElement("table");
+		wrapperTable = document.createElement("table");
 		wrapperTable.className = "small";
-		wrapperTable.innerHTML = this.dataRequest;
+		wrapperTable.innerHTML = this.resultData[this.config.haltestelle];
 		return wrapperTable;
 	},
 
-	getHtml: function(jsonObject) {
-		var htmlText = "";
+	getHtml: function (jsonObject) {
+		let htmlText = "";
 
-		for (var i = 0, len = jsonObject.departures.length; i < this.config.maxEntries; i++) {
+		// console.log("payload.maxEntries: " + payload.maxEntries);
+		for (let i = 0; i < this.config.maxEntries; i++) {
 			// get one item from api result
-			var apiResultItem = jsonObject.departures[i];
+			const apiResultItem = jsonObject.departures[i];
 			// get transport type
-			var transportType = apiResultItem.product.toLocaleLowerCase();
+			const transportType = apiResultItem.product.toLocaleLowerCase();
+
+			// console.log("transportType: " + transportType);
+			// console.log("apiResultItem.destination: " + apiResultItem.destination);
+			// console.log("apiResultItem.departureTime: " + apiResultItem.departureTime);
 
 			// check if we should show data of this transport type
 			// check if current station is not part of the ignore list
@@ -110,99 +118,105 @@ Module.register("mvgmunich", {
 			// add last station aka direction
 			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
 			// check if user want's to see departure time
-			htmlText += this.showDepartureTime(apiResultItem.departureTime, this.config);
+			htmlText += this.showDepartureTime(apiResultItem.departureTime);
 			// check if user want's to see walking time
 			htmlText += this.showWalkingTime(apiResultItem.departureTime);
 			htmlText += "</tr>";
 		}
-
+		// console.log("htmlText: " + "haltestelle: " + payload.haltestelle + " - " + htmlText);
 		return htmlText;
 	},
 
-	showIcons(product, showIcons) {
-		// if (Object.is(showIcons, true)) {
-		if(showIcons)
-			return "<td class='" + product.toLocaleLowerCase() + "'></td>";
-		return "";
+	showIcons: function (product, showIcons) {
+		// console.log("Show icons: ", showIcons);
+		let icons = "";
+		if (showIcons) {
+			icons = "<td class='" + product.toLocaleLowerCase() + "'></td>";
+		}
+		// console.log("Icons content: {}", icons);
+		return icons;
 	},
 
 	showWalkingTime: function (departureTime) {
-		var htmlText = "";
+		let htmlText = "";
 		if (this.config.showWalkingTime) {
 			htmlText += "<td> / ";
-			var startWalkingTime = new Date(departureTime - this.config.timeToWalk * MS_PER_MINUTE);
+			const startWalkingTime = new Date(departureTime - this.config.timeToWalk * MS_PER_MINUTE);
 			// check what kind of walking time user wants (absolute / relative)
-			if(this.config.walkingTimeFormat == "absolute") {
-					htmlText += this.getAbsoluteTime(startWalkingTime);
-			} else if (this.config.walkingTimeFormat == "relative") {
+			if (this.config.walkingTimeFormat === "absolute") {
+				htmlText += this.getAbsoluteTime(startWalkingTime);
+			} else if (this.config.walkingTimeFormat === "relative") {
 				htmlText += this.getRelativeTime(startWalkingTime);
 			} else {
-				htmlText += "walkingTimeFormat config is wrong"
+				htmlText += "walkingTimeFormat config is wrong";
 			}
 			htmlText += "</td>";
 		}
 		return htmlText;
 	},
 
-	showDepartureTime: function (departureTime, config) {
-		var htmlText = "";
-		if(config.showTrainDepartureTime) {
+	showDepartureTime: function (departureTime) {
+		let htmlText = "";
+		if (this.config.showTrainDepartureTime) {
 			// add departure time
 			htmlText += "<td class='timing'>";
-			var departureTime = new Date(departureTime)
-
+			const departureDate = new Date(departureTime);
+			// console.log("departureDate: " + departureDate);
 			// check what kind of time user wants (absolute / relative)
-			if(config.trainDepartureTimeFormat == "absolute") {
-				htmlText += this.getAbsoluteTime(departureTime);
-			} else if (config.trainDepartureTimeFormat == "relative") {
-				htmlText += this.getRelativeTime(departureTime);
+			if (this.config.trainDepartureTimeFormat === "absolute") {
+				htmlText += this.getAbsoluteTime(departureDate);
+			} else if (this.config.trainDepartureTimeFormat === "relative") {
+				htmlText += this.getRelativeTime(departureDate);
 			} else {
-				htmlText += "trainDepartureTimeFormat config is wrong"
+				htmlText += "trainDepartureTimeFormat config is wrong";
 			}
-			htmlText +=  "</td>";
+			htmlText += "</td>";
 		}
 		return htmlText;
 	},
 
-	getAbsoluteTime: function(time) {
-		var hoursStr = (time.getHours() < 10 ? '0' : '') + time.getHours();
-		var minutesStr = (time.getMinutes() < 10 ? '0' : '') + time.getMinutes();
+	getAbsoluteTime: function (time) {
+		let hoursStr = (time.getHours() < 10 ? "0" : "") + time.getHours();
+		let minutesStr = (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
 
 		return hoursStr + ":" + minutesStr;
 	},
 
-	getRelativeTime: function(time) {
-		var timingForStartWalking = Math.floor((time.getTime() - new Date().getTime()) / 1000 / 60);
-		return (timingForStartWalking <=0
+	getRelativeTime: function (time) {
+		const timingForStartWalking = Math.floor((time.getTime() - new Date().getTime()) / 1000 / 60);
+		return (timingForStartWalking <= 0
 			? this.translate("JETZT")
 			: this.translate("IN") + " " + timingForStartWalking + " " + this.translate("MIN"));
 	},
 
 	// Override getHeader method.
-	getHeader: function() {
-		return this.data.header + " Munich: " + this.config.haltestelleName;
+	getHeader: function () {
+		if (this.config.haltestelle !== "" || this.config.haltestelleName !== "") {
+			return this.data.header + " Munich: " +
+				(this.config.haltestelleName === "" ? this.config.haltestelle : this.config.haltestelleName);
+		}
+		return "";
 	},
 
-	socketNotificationReceived: function(notification, payload) {
-		if (notification === "UPDATE") {
-			this.dataRequest = this.getHtml(payload);
-			this.loaded = true;
-			this.updateDom();
+	socketNotificationReceived: function (notification, payload) {
+		// console.log("Notification in mvgmunich: " + notification + " - " + payload);
+		// console.log("this.config.haltestelle: " + this.config.haltestelle);
+		// console.log("payload.transport: " + payload.transport);
+		switch (notification) {
+		case "UPDATE_DEPARTURE_INFO":
+			this.resultData[payload.haltestelle] = this.getHtml(payload.transport);
+			break;
+		case "UPDATE_STATION":
+			if (this.config.haltestelle === payload.haltestelle) {
+				this.config.haltestelleId = payload.haltestelleId;
+				this.config.haltestelleName = payload.haltestelleName;
+			}
+			this.getHeader();
+			this.getData();
+			break;
+		default:
+			Log.error();
 		}
-		if (notification === "ERROR") {
-			this.dataRequest = payload;
-			this.loaded = true;
-			this.updateDom();
-		}
-		if (notification === "ERROR_NO_STATION") {
-			this.dataRequest = this.translate("NO_STATION");
-			this.loaded = true;
-			this.updateDom();
-		}
-		if (notification === "STATION") {
-			this.config.haltestelleName = payload.name;
-			this.config.haltestelleId = payload.id
-			this.sendSocketNotification("GETDATA", this.config);
-		}
+		this.updateDom();
 	}
 });
