@@ -64,6 +64,7 @@ Module.register("mvgmunich", {
 	 */
 	getData: function () {
 		const self = this;
+		self.sendSocketNotification("GET_DEPARTURE_DATA", self.config);
 		setInterval(function () {
 			self.sendSocketNotification("GET_DEPARTURE_DATA", self.config);
 		}, self.config.updateInterval);
@@ -93,7 +94,11 @@ Module.register("mvgmunich", {
 		let htmlText = "";
 
 		// console.log("payload.maxEntries: " + payload.maxEntries);
-		for (let i = 0; i < this.config.maxEntries; i++) {
+		let visibleLines = 0;
+		for (let i = 0; i < jsonObject.departures.length; i++) {
+			if (visibleLines >= this.config.maxEntries) {
+				break;
+			}
 			// get one item from api result
 			const apiResultItem = jsonObject.departures[i];
 			// get transport type
@@ -122,6 +127,7 @@ Module.register("mvgmunich", {
 			// check if user want's to see walking time
 			htmlText += this.showWalkingTime(apiResultItem.departureTime);
 			htmlText += "</tr>";
+			visibleLines++;
 		}
 		// console.log("htmlText: " + "haltestelle: " + payload.haltestelle + " - " + htmlText);
 		return htmlText;
