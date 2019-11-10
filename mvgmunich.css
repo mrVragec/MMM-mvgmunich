@@ -13,6 +13,10 @@
     min-width: 240px;
 }
 
+.mvgmunich td {
+    color: white;
+}
+
 .mvgmunich td.tram {
     background: url(resources/tram.svg) no-repeat 0 0;
     width: 30px;
