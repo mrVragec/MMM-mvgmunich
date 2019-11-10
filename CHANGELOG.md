@@ -1,3 +1,9 @@
+## [1.0.7] - 2019-11-10
+- fix a problem with loading plugin more then once
+- fix problem with counting visible stations
+- change MVG API URL
+- fix some typos
+
 ## [1.0.6] - 2019-09-17
 - add option to show route for regional bus
 
