@@ -1,3 +1,6 @@
+## [1.0.8] - 2019-12-04
+- add option to include or exclude line based on line name.
+
 ## [1.0.7] - 2019-11-10
 - fix a problem with loading plugin more then once
 - fix problem with counting visible stations
