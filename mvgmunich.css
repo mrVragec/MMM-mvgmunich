@@ -7,14 +7,17 @@
  */
 
 .stationColumn {
-    color: white;
     padding-left: 10px;
     padding-right: 10px;
     min-width: 240px;
 }
 
-.mvgmunich td {
+.mvgmunich tr.normal {
     color: white;
+}
+
+.mvgmunich tr.gray {
+    color: dimgray;
 }
 
 .mvgmunich td.tram {
@@ -40,6 +43,14 @@
 
 .mvgmunich td.ubahn {
     background: url(resources/u-bahn.svg) no-repeat 0 0;
+    width: 30px;
+    padding-bottom: 5px;
+    background-size: 25px;
+}
+
+.mvgmunich td.empty {
+    color: dimgray;
+    font-size: 16px;
     width: 30px;
     padding-bottom: 5px;
     background-size: 25px;

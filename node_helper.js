@@ -20,15 +20,18 @@ const globals = {
 	"Accept-Encoding": "gzip",
 	"Accept-Language": "en-US,en;q=0.9,de;q=0.8"
 };
-
+const mvgAPI = "https://www.mvg.de/";
+const apiBase = mvgAPI + "api/fahrinfo/departure/";
+const stationQuery = mvgAPI + "api/fahrinfo/location/queryWeb?q=";
+const interruptionsURL = mvgAPI + ".rest/betriebsaenderungen/api/interruptions?_=";
 module.exports = NodeHelper.create({
 
 	socketNotificationReceived: function (notification, payload) {
-		// console.log("Notification in node_helper: " + notification + " - " + payload);
 		const self = this;
 		switch (notification) {
 		case "GET_STATION_INFO":
 			self.getStationInfo(payload);
+			self.getInterruptionsInfo();
 			break;
 		case "GET_DEPARTURE_DATA":
 			self.getDepartureInfo(payload);
@@ -40,15 +43,12 @@ module.exports = NodeHelper.create({
 
 	getDepartureInfo: function (payload) {
 		const self = this;
-		// console.log("Haltestelle: {} URL: {}", payload.haltestelle, payload.apiBase + payload.haltestelleId + "?footway=" + payload.timeToWalk);
 		request({
 			headers: globals,
-			uri: payload.apiBase + payload.haltestelleId + "?footway=" + payload.timeToWalk,
+			uri: apiBase + payload.haltestelleId + "?footway=" + payload.timeToWalk,
 			method: "GET",
 			gzip: true
 		}, function (error, response, body) {
-			// console.log("Response: " + response);
-			// console.log("Body: " + body);
 			if (error) {
 				// Error while reading departure data ...
 				console.error("Error while reading departure info", error);
@@ -56,9 +56,6 @@ module.exports = NodeHelper.create({
 			} else {
 				// body is the decompressed response body
 				try {
-					// console.log("haltestelle: {} Body: {}", payload.haltestelle, body);
-					// console.log("haltestelle: {} jsonObject: {}", payload.haltestelle, jsonObject);
-					// payload.transport = self.getHtml(JSON.parse(body), payload);
 					payload.transport = JSON.parse(body);
 					self.sendSocketNotification("UPDATE_DEPARTURE_INFO", payload);
 				} catch (e) {
@@ -71,10 +68,9 @@ module.exports = NodeHelper.create({
 
 	getStationInfo: function (payload) {
 		const self = this;
-		// console.log("Station info Query: {}", payload.stationQuery + urlencode(payload.haltestelle));
 		request({
 			headers: globals,
-			uri: payload.stationQuery + urlencode(payload.haltestelle),
+			uri: stationQuery + urlencode(payload.haltestelle),
 			method: "GET",
 			gzip: true
 		}, function (error, response, body) {
@@ -89,7 +85,6 @@ module.exports = NodeHelper.create({
 					if (jsonObject.locations[0].id === undefined) {
 						self.sendSocketNotification("ERROR_NO_STATION", "");
 					} else {
-						// console.log("json: {}", jsonObject.locations[0]);
 						payload.haltestelleId = jsonObject.locations[0].id;
 						payload.haltestelleName = jsonObject.locations[0].name;
 						self.sendSocketNotification("UPDATE_STATION", payload);
@@ -97,6 +92,31 @@ module.exports = NodeHelper.create({
 				} catch (e) {
 					console.error("Error while parsing and sending station info", e);
 					self.sendSocketNotification("ERROR_NO_STATION", "");
+				}
+			}
+		});
+	},
+
+	getInterruptionsInfo: function () {
+		const self = this;
+
+		request({
+			headers: globals,
+			uri: interruptionsURL + new Date().getMilliseconds(),
+			method: "GET",
+			gzip: true
+		}, function (error, response, body) {
+			if (error) {
+				// Error while reading interruptions data ...
+				console.error("Error while reading interruptions data", error);
+			} else {
+				// body is the decompressed response body
+				try {
+					let jsonObject = JSON.parse(body);
+					self.sendSocketNotification("UPDATE_INTERRUPTION_DATA", jsonObject);
+				} catch (e) {
+					// Error while reading interruptions data ...
+					console.error("Error while parsing interruptions data", e);
 				}
 			}
 		});

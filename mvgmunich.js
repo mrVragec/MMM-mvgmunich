@@ -10,14 +10,11 @@
  */
 
 const MS_PER_MINUTE = 60000;
-const mvgAPI = "https://www.mvg.de/api";
 Module.register("mvgmunich", {
 	// Default module configuration
 	defaults: {
 		maxEntries: 8, // maximum number of results shown on UI
 		updateInterval: MS_PER_MINUTE, // update every 60 seconds
-		apiBase: mvgAPI + "/fahrinfo/departure/",
-		stationQuery: mvgAPI + "/fahrinfo/location/queryWeb?q=",
 		haltestelle: "Hauptbahnhof", // default departure station
 		haltestelleId: 0,
 		haltestelleName: "",
@@ -34,7 +31,10 @@ Module.register("mvgmunich", {
 			"regional_bus": true,
 			"bus": true,
 			"tram": true
-		}
+		},
+		showInterruptions: false,
+		showInterruptionsDetails: false,
+		countInterruptionsAsItemShown: false,
 	},
 
 	getStyles: function () {
@@ -51,6 +51,7 @@ Module.register("mvgmunich", {
 
 	start: function () {
 		this.resultData = [];
+		this.interruptionData = null;
 		Log.info("Starting module: " + this.name + ", identifier: " + this.identifier);
 		if (this.config.haltestelle !== "") {
 			this.sendSocketNotification("GET_STATION_INFO", this.config);
@@ -78,7 +79,7 @@ Module.register("mvgmunich", {
 			wrapperTable.innerHTML = "Please set value for 'Haltestelle'.";
 			return wrapperTable;
 		}
-		// console.log("this.resultData: {}", this.resultData);
+
 		if (this.resultData === []) {
 			wrapperTable.className = "dimmed light small";
 			wrapperTable.innerHTML = "Loading data from MVG ...";
@@ -93,7 +94,6 @@ Module.register("mvgmunich", {
 	getHtml: function (jsonObject) {
 		let htmlText = "";
 
-		// console.log("payload.maxEntries: " + payload.maxEntries);
 		let visibleLines = 0;
 		for (let i = 0; i < jsonObject.departures.length; i++) {
 			if (visibleLines >= this.config.maxEntries) {
@@ -104,10 +104,6 @@ Module.register("mvgmunich", {
 			// get transport type
 			const transportType = apiResultItem.product.toLocaleLowerCase();
 
-			// console.log("transportType: " + transportType);
-			// console.log("apiResultItem.destination: " + apiResultItem.destination);
-			// console.log("apiResultItem.departureTime: " + apiResultItem.departureTime);
-
 			// check if we should show data of this transport type
 			// check if current station is not part of the ignore list
 			if (!this.config.transportTypesToShow[transportType] ||
@@ -115,7 +111,11 @@ Module.register("mvgmunich", {
 				continue;
 			}
 
-			htmlText += "<tr class='normal'>";
+			if (this.config.showInterruptions && this.isLineAffected(apiResultItem.label)) {
+				htmlText += "<tr class='gray'>";
+			} else {
+				htmlText += "<tr class='normal'>";
+			}
 			// check if user want's icons
 			htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
 			// add transport number
@@ -127,21 +127,45 @@ Module.register("mvgmunich", {
 			// check if user want's to see walking time
 			htmlText += this.showWalkingTime(apiResultItem.departureTime);
 			htmlText += "</tr>";
+			if (this.config.showInterruptionsDetails && this.isLineAffected(apiResultItem.label)) {
+				htmlText += "<tr><td></td><td class='empty' colspan='3'>" + this.getInterruptionsDetails(apiResultItem.label) + "</td></tr>";
+				if (this.config.countInterruptionsAsItemShown) {
+					visibleLines++;
+				}
+			}
 			visibleLines++;
 		}
-		// console.log("htmlText: " + "haltestelle: " + payload.haltestelle + " - " + htmlText);
 		return htmlText;
 	},
 
+	isLineAffected: function (lineName) {
+		for (let i = 0; i < this.interruptionData.affectedLines.line.length; i++) {
+			if (this.interruptionData.affectedLines.line[i].line === lineName) {
+				return true;
+			}
+		}
+		return false;
+	},
+
+	getInterruptionsDetails: function (lineName) {
+		for (let i = 0; i < this.interruptionData.interruption.length; i++) {
+			for (let j = 0; j < this.interruptionData.interruption[i].lines.line.length; j++) {
+				if (this.interruptionData.interruption[i].lines.line[j].line === lineName) {
+					return this.interruptionData.interruption[i].duration.text + " - " + this.interruptionData.interruption[i].title;
+				}
+			}
+		}
+		return "";
+	},
+
 	showIcons: function (product, showIcons) {
-		// console.log("Show icons: ", showIcons);
 		let icons = "";
 		if (showIcons) {
 			icons = "<td class='" + product.toLocaleLowerCase() + "'></td>";
 		}
-		// console.log("Icons content: {}", icons);
 		return icons;
-	},
+	}
+	,
 
 	showWalkingTime: function (departureTime) {
 		let htmlText = "";
@@ -159,7 +183,8 @@ Module.register("mvgmunich", {
 			htmlText += "</td>";
 		}
 		return htmlText;
-	},
+	}
+	,
 
 	showDepartureTime: function (departureTime) {
 		let htmlText = "";
@@ -167,7 +192,6 @@ Module.register("mvgmunich", {
 			// add departure time
 			htmlText += "<td class='timing'>";
 			const departureDate = new Date(departureTime);
-			// console.log("departureDate: " + departureDate);
 			// check what kind of time user wants (absolute / relative)
 			if (this.config.trainDepartureTimeFormat === "absolute") {
 				htmlText += this.getAbsoluteTime(departureDate);
@@ -179,21 +203,24 @@ Module.register("mvgmunich", {
 			htmlText += "</td>";
 		}
 		return htmlText;
-	},
+	}
+	,
 
 	getAbsoluteTime: function (time) {
 		let hoursStr = (time.getHours() < 10 ? "0" : "") + time.getHours();
 		let minutesStr = (time.getMinutes() < 10 ? "0" : "") + time.getMinutes();
 
 		return hoursStr + ":" + minutesStr;
-	},
+	}
+	,
 
 	getRelativeTime: function (time) {
 		const timingForStartWalking = Math.floor((time.getTime() - new Date().getTime()) / 1000 / 60);
 		return (timingForStartWalking <= 0
 			? this.translate("JETZT")
 			: this.translate("IN") + " " + timingForStartWalking + " " + this.translate("MIN"));
-	},
+	}
+	,
 
 	// Override getHeader method.
 	getHeader: function () {
@@ -202,16 +229,15 @@ Module.register("mvgmunich", {
 				(this.config.haltestelleName === "" ? this.config.haltestelle : this.config.haltestelleName);
 		}
 		return "";
-	},
+	}
+	,
 
 	socketNotificationReceived: function (notification, payload) {
-		// console.log("Notification in mvgmunich: " + notification + " - " + payload);
-		// console.log("this.config.haltestelle: " + this.config.haltestelle);
-		// console.log("payload.transport: " + payload.transport);
 		switch (notification) {
 		case "UPDATE_DEPARTURE_INFO":
 			this.resultData[payload.haltestelle] = this.getHtml(payload.transport);
 			break;
+
 		case "UPDATE_STATION":
 			if (this.config.haltestelle === payload.haltestelle) {
 				this.config.haltestelleId = payload.haltestelleId;
@@ -220,6 +246,11 @@ Module.register("mvgmunich", {
 			this.getHeader();
 			this.getData();
 			break;
+
+		case "UPDATE_INTERRUPTION_DATA":
+			this.interruptionData = payload;
+			break;
+
 		default:
 			Log.error();
 		}
