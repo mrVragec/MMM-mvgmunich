@@ -19,7 +19,12 @@ Module.register("mvgmunich", {
 		haltestelleId: 0,
 		haltestelleName: "",
 		ignoreStations: [], // list of destination to be ignored in the list
-		timeToWalk: 0, // walking time to the station
+		lineFiltering: {
+			"active": true, 			// set this to active if filtering should be used
+			"filterType": "whitelist", 	// whitelist = only specified lines will be displayed, blacklist = all lines except specified lines will be displayed
+			"lineNumbers": ["U1, U3, X50"] // lines that should be on the white-/blacklist
+		},
+		timeToWalk: 0, 		// walking time to the station
 		showWalkingTime: false, // if the walking time should be included and the starting time is displayed
 		showTrainDepartureTime: true,
 		trainDepartureTimeFormat: "relative",
@@ -105,9 +110,10 @@ Module.register("mvgmunich", {
 			const transportType = apiResultItem.product.toLocaleLowerCase();
 
 			// check if we should show data of this transport type
-			// check if current station is not part of the ignore list
-			if (!this.config.transportTypesToShow[transportType] ||
-				this.config.ignoreStations.includes(apiResultItem.destination)) {
+			if (!this.config.transportTypesToShow[transportType]
+				|| this.config.ignoreStations.includes(apiResultItem.destination)
+				|| this.checkToIgnoreOrIncludeLine(apiResultItem.label)
+			) {
 				continue;
 			}
 
@@ -136,6 +142,18 @@ Module.register("mvgmunich", {
 			visibleLines++;
 		}
 		return htmlText;
+	},
+
+	checkToIgnoreOrIncludeLine: function (lineName) {
+		if (this.config.lineFiltering.active) {
+			return (this.config.lineFiltering.filterType === "whitelist" ?
+				!this.checkLineNumbersIncludes(lineName) : this.checkLineNumbersIncludes(lineName));
+		}
+		return false;
+	},
+
+	checkLineNumbersIncludes: function (lineName) {
+		return (this.config.lineFiltering.lineNumbers.includes(lineName));
 	},
 
 	isLineAffected: function (lineName) {
