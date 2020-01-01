@@ -34,7 +34,7 @@
     background-size: 25px;
 }
 
-.mvgmunich td.bus {
+.mvgmunich td.bus, .mvgmunich td.regional_bus {
     background: url(resources/bus.svg) no-repeat 0 0;
     width: 30px;
     padding-bottom: 5px;
