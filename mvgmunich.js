@@ -145,11 +145,10 @@ Module.register("mvgmunich", {
 	},
 
 	checkToIgnoreOrIncludeLine: function (lineName) {
-		if (this.config.lineFiltering.active) {
-			return (this.config.lineFiltering.filterType === "whitelist" ?
+		return this.config.lineFiltering !== undefined 
+		&& this.config.lineFiltering.active 
+		&& (this.config.lineFiltering.filterType.localeCompare("whitelist") === 0 ?
 				!this.checkLineNumbersIncludes(lineName) : this.checkLineNumbersIncludes(lineName));
-		}
-		return false;
 	},
 
 	checkLineNumbersIncludes: function (lineName) {
