@@ -166,12 +166,14 @@ Module.register("mvgmunich", {
 
 	getInterruptionsDetails: function (lineName) {
 		for (let i = 0; i < this.interruptionData.interruption.length; i++) {
+     if (this.interruptionData.interruption[i].lines.line != null) {
 			for (let j = 0; j < this.interruptionData.interruption[i].lines.line.length; j++) {
 				if (this.interruptionData.interruption[i].lines.line[j].line === lineName) {
 					return this.interruptionData.interruption[i].duration.text + " - " + this.interruptionData.interruption[i].title;
 				}
 			}
 		}
+   }
 		return "";
 	},
 
