@@ -162,9 +162,11 @@ Module.register("mvgmunich", {
 	},
 
 	isLineAffected: function (lineName) {
-		for (let i = 0; i < this.interruptionData.affectedLines.line.length; i++) {
-			if (this.interruptionData.affectedLines.line[i].line === lineName) {
-				return true;
+		if (this.interruptionData.affectedLines != undefined) {
+			for (let i = 0; i < this.interruptionData.affectedLines.line.length; i++) {
+				if (this.interruptionData.affectedLines.line[i].line === lineName) {
+					return true;
+				}
 			}
 		}
 		return false;
