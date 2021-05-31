@@ -3,7 +3,161 @@
 MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in Munich - Germany.
 
 ## Example
-![](.github/Example_4.png)
+
+|     |     |
+| --- | --- |
+|  **Stations names with arrival time**  | ![](.github/Example_1.png) | 
+```
+config: {
+    haltestelle: "Hauptbahnhof",
+    maxEntries: 10,             // 10 items on screen
+    updateInterval: 60000,      // 60 s
+    showIcons: false,            // Show transport type icon
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": false,            // show sbahn route
+        "bus": false,              // show bus route
+        "regional_bus": false,     // show regional bus route
+        "tram": false              // show tram route
+    },
+    ignoreStations: [],         // destination not to be shown
+    timeToWalk: 0,             // 10 min walking time to station. Default is 0
+    showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,     // show tran departure time
+    trainDepartureTimeFormat: "relative",   // format of the train departure time
+    walkingTimeFormat: "relative",    // format of the walking time
+}
+```
+|     |     |
+| --- | --- |
+| **Stations names with icons and arrival time** | ![](.github/Example_3.png) |
+
+```
+config: {
+    haltestelle: "Karlsplatz",
+    maxEntries: 15,             // 10 items on screen
+    updateInterval: 60000,      // 60 s
+    showIcons: true,            // Show transport type icon
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": true,            // show sbahn route
+        "bus": false,              // show bus route
+        "regional_bus": false,     // show regional bus route
+        "tram": true              // show tram route
+    },
+    ignoreStations: [],         // destination not to be shown
+    timeToWalk: 0,             // 10 min walking time to station. Default is 0
+    showWalkingTime: true,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,     // show tran departure time
+    trainDepartureTimeFormat: "relative",   // format of the train departure time
+    walkingTimeFormat: "relative"    // format of the walking time
+}
+```
+|     |     |
+| --- | --- |
+|  **Stations names with icons, arrival time and walking time** | ![](.github/Example_4.png) |
+```
+config: {
+    haltestelle: "Karlsplatz",
+    maxEntries: 15,             // 10 items on screen
+    updateInterval: 60000,      // 60 s
+    showIcons: true,            // Show transport type icon
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": true,            // show sbahn route
+        "bus": true,              // show bus route
+        "regional_bus": false,     // show regional bus route
+        "tram": true              // show tram route
+    },
+    ignoreStations: [],         // destination not to be shown
+    timeToWalk: 0,             // 10 min walking time to station. Default is 0
+    showWalkingTime: true,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,     // show tran departure time
+    trainDepartureTimeFormat: "absolute",   // format of the train departure time
+    walkingTimeFormat: "relative"    // format of the walking time
+}
+```
+
+|     |     |
+| --- | --- |
+| **Stations names with icons, arrival time and disruption marking** | ![](.github/Example_5.png) |
+```
+config: {
+    haltestelle: "Harras",
+    maxEntries: 10,             // 10 items on screen
+    updateInterval: 60000,      // 60 s
+    showIcons: true,            // Show transport type icon
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": true,            // show sbahn route
+        "bus": true,              // show bus route
+        "regional_bus": false,     // show regional bus route
+        "tram": false              // show tram route
+    },
+    ignoreStations: [],         // destination not to be shown
+    timeToWalk: 0,             // 10 min walking time to station. Default is 0
+    showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,     // show tran departure time
+    trainDepartureTimeFormat: "absolute",   // format of the train departure time
+    walkingTimeFormat: "relative",    // format of the walking time
+    showInterruptions: true,
+    showInterruptionsDetails: false,
+    countInterruptionsAsItemShown: false
+```
+
+|     |     |
+| --- | --- |
+| **Stations names with icons, arrival time, disruption marking and disruptions details** (disruption details are not counted as new lines)| ![](.github/Example_6.png) |
+```
+config: {
+    haltestelle: "Harras",
+    maxEntries: 10,             // 10 items on screen
+    updateInterval: 60000,      // 60 s
+    showIcons: true,            // Show transport type icon
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": true,            // show sbahn route
+        "bus": true,              // show bus route
+        "regional_bus": false,     // show regional bus route
+        "tram": false              // show tram route
+    },
+    ignoreStations: [],         // destination not to be shown
+    timeToWalk: 0,             // 10 min walking time to station. Default is 0
+    showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,     // show tran departure time
+    trainDepartureTimeFormat: "absolute",   // format of the train departure time
+    walkingTimeFormat: "relative",    // format of the walking time
+    showInterruptions: true,
+    showInterruptionsDetails: true,
+    countInterruptionsAsItemShown: false
+```
+
+|     |     |
+| --- | --- |
+| **Stations names with icons, arrival time, disruption marking and disruptions details** (disruption details are counted as new lines) | ![](.github/Example_7.png) |
+```
+config: {
+    haltestelle: "Harras",
+    maxEntries: 10,             // 10 items on screen
+    updateInterval: 60000,      // 60 s
+    showIcons: true,            // Show transport type icon
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": true,            // show sbahn route
+        "bus": true,              // show bus route
+        "regional_bus": false,     // show regional bus route
+        "tram": false              // show tram route
+    },
+    ignoreStations: [],         // destination not to be shown
+    timeToWalk: 0,             // 10 min walking time to station. Default is 0
+    showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,     // show tran departure time
+    trainDepartureTimeFormat: "absolute",   // format of the train departure time
+    walkingTimeFormat: "relative",    // format of the walking time
+    showInterruptions: true,
+    showInterruptionsDetails: true,
+    countInterruptionsAsItemShown: true
+```
 
 ## Dependencies
 * instance of [MagicMirror²](https://github.com/MichMich/MagicMirror)
@@ -16,27 +170,35 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 4. Add configuration block to your config.js:
 ```
 {
-  module: "mvgmunich",
-  position: "bottom_left",
-  header: "MVG",
+    module: "mvgmunich",
+    position: "bottom_left",
+    header: "MVG",
     config: {
-      haltestelle: "Hauptbahnhof",
-      maxEntries: 10,             // 10 items on screen
-      updateInterval: 60000,      // 60 s
-      showIcons: true,            // Show transport type icon
-      transportTypesToShow: {
-        "ubahn": true,            // show ubahn route
-        "sbahn": true,            // show sbahn route
-        "bus": true,              // show bus route
-        "regional_bus": true,     // show regional bus route
-        "tram": true              // show tram route
-      },
-      ignoreStations: [],         // destination not to be shown
-      timeToWalk: 10,             // 10 min walking time to station. Default is 0
-      showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
-      showTrainDepartureTime: true,     // show tran departure time
-      trainDepartureTimeFormat: "relative",   // format of the train departure time
-      walkingTimeFormat: "relative",    // format of the walking time
+        haltestelle: "Hauptbahnhof",
+        maxEntries: 10,             // 10 items on screen
+        updateInterval: 60000,      // 60 s
+        showIcons: true,            // Show transport type icon
+        transportTypesToShow: {
+            "ubahn": true,            // show ubahn route
+            "sbahn": true,            // show sbahn route
+            "bus": true,              // show bus route
+            "regional_bus": true,     // show regional bus route
+            "tram": true              // show tram route
+        },
+        ignoreStations: [],         // lines with destination to which should not be shown
+        lineFiltering: {
+            "active": true, 			// set this to active if filtering should be used
+            "filterType": "whitelist", 	// whitelist = only specified lines will be displayed, blacklist = all lines except specified lines will be displayed
+            "lineNumbers": ["U1", "U3", "X50"] // lines that should be on the white-/blacklist
+        },
+        timeToWalk: 10,             // 10 min walking time to station. Default is 0
+        showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
+        showTrainDepartureTime: true,             // show tran departure time
+        trainDepartureTimeFormat: "relative",     // format of the train departure time
+        walkingTimeFormat: "relative",            // format of the walking time
+        showInterruptions: true,				    // show interruptions as gray-out rows
+        showInterruptionsDetails: false,		    // show details of interruptions in next line
+        countInterruptionsAsItemShown: false,	    // count interruptions details lines as a line shown
     }
 },
 ```
@@ -58,3 +220,9 @@ MagicMirror² Module to monitor public transport (U-bahn, tram, bus, S-Bahn) in 
 | `showTrainDepartureTime` | If the time of train departure should be displayed. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
 | `trainDepartureTimeFormat` | Train departure time format. Absolute: 21:10; Relative: in 8 min; <br> **Possible values:** `relative` or `absolute` <br> **Default** `relative` |
 | `walkingTimeFormat` | Walking time format. Absolute: 21:08; Relative in 6 min; <br> **Possible values:** `relative` or `absolute` <br> **Default** `relative` |
+| `showInterruptions` | Gray-out lines with interruptions; <br> **Possible values:** `true` or `false` <br> **Default** `false` |
+| `showInterruptionsDetails` | Show interruptions details in a new line after the item with interruptions; <br> **Possible values:** `true` or `false` <br> **Default** `false` |
+| `countInterruptionsAsItemShown` | Count interruption detail lines as line of a transport (number of lines will not explode in case of many interruptions; <br> **Possible values:** `true` or `false` <br> **Default** `false`  |
+| `lineFiltering`.`active` | Flag to activate or deactivate line filtering <br> **Possible values:** `true` or `false` <br> **Default** `false`  |
+| `lineFiltering`.`filterType` | Whitelist or blacklist option lines from `lineFiltering`.`lineNumbers` <br> **Possible values:** `whitelist` or `blacklist` <br> **Default** `blacklist` |
+| `lineFiltering`.`lineNumbers` | lines that should be on the white-/blacklist <br> **Possible values** `["U1, U3, X50"]` <br> **Default value** `[]` |
