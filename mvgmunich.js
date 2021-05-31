@@ -100,6 +100,8 @@ Module.register("mvgmunich", {
 		let htmlText = "";
 
 		let visibleLines = 0;
+		const interruptions = new Set();
+
 		for (let i = 0; i < jsonObject.departures.length; i++) {
 			if (visibleLines >= this.config.maxEntries) {
 				break;
@@ -134,9 +136,13 @@ Module.register("mvgmunich", {
 			htmlText += this.showWalkingTime(apiResultItem.departureTime);
 			htmlText += "</tr>";
 			if (this.config.showInterruptionsDetails && this.isLineAffected(apiResultItem.label)) {
-				htmlText += "<tr><td></td><td class='empty' colspan='3'>" + this.getInterruptionsDetails(apiResultItem.label) + "</td></tr>";
-				if (this.config.countInterruptionsAsItemShown) {
-					visibleLines++;
+				let interruption = this.getInterruptionsDetails(apiResultItem.label);
+				if (!interruptions.has(interruption)) {
+					interruptions.add(interruption);
+					htmlText += "<tr><td></td><td class='empty' colspan='3'>" + interruption +"</td></tr>";
+					if (this.config.countInterruptionsAsItemShown) {
+						visibleLines++;
+					}
 				}
 			}
 			visibleLines++;
@@ -156,9 +162,11 @@ Module.register("mvgmunich", {
 	},
 
 	isLineAffected: function (lineName) {
-		for (let i = 0; i < this.interruptionData.affectedLines.line.length; i++) {
-			if (this.interruptionData.affectedLines.line[i].line === lineName) {
-				return true;
+		if (this.interruptionData.affectedLines != undefined) {
+			for (let i = 0; i < this.interruptionData.affectedLines.line.length; i++) {
+				if (this.interruptionData.affectedLines.line[i].line === lineName) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -166,12 +174,14 @@ Module.register("mvgmunich", {
 
 	getInterruptionsDetails: function (lineName) {
 		for (let i = 0; i < this.interruptionData.interruption.length; i++) {
-			for (let j = 0; j < this.interruptionData.interruption[i].lines.line.length; j++) {
-				if (this.interruptionData.interruption[i].lines.line[j].line === lineName) {
-					return this.interruptionData.interruption[i].duration.text + " - " + this.interruptionData.interruption[i].title;
+			if (this.interruptionData.interruption[i].lines.line != null) {
+				for (let j = 0; j < this.interruptionData.interruption[i].lines.line.length; j++) {
+					if (this.interruptionData.interruption[i].lines.line[j].line === lineName) {
+						return this.interruptionData.interruption[i].duration.text + " - " + this.interruptionData.interruption[i].title;
+					}
 				}
 			}
-		}
+   		}
 		return "";
 	},
 
