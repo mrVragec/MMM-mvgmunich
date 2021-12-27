@@ -159,6 +159,37 @@ config: {
     countInterruptionsAsItemShown: true
 ```
 
+|     |     |
+| --- | --- |
+| **Stations names with icons, coloring, fading, arrival time and delay** | ![](.github/Example_8.png) |
+```
+config: {
+    haltestelle: "Hauptbahnhof",
+    maxEntries: 10,             // 10 items on screen
+    updateInterval: 60*1000,    // 60 s
+    showIcons: true,            // show transport type icon
+    showLineColors: true,       // use line color
+    iconOpacity: 0.8,           // make line icon less bright
+    transportTypesToShow: {
+        "ubahn": true,            // show ubahn route
+        "sbahn": true,            // show sbahn route
+        "bus": true,              // show bus route
+        "regional_bus": true,     // show regional bus route
+        "tram": true              // show tram route
+    },
+    ignoreStations: [],         // lines with destination to which should not be shown
+    lineFiltering: { "active": false }, // disable line filtering
+    timeToWalk: 10,             // 10 min walking time to station
+    showWalkingTime: false,     // if the walking time should be included and the starting time is displayed
+    showTrainDepartureTime: true,             // show train departure time
+    trainDepartureTimeFormat: "relative",     // format of the train departure time
+    walkingTimeFormat: "relative",            // format of the walking time
+    showDelay: true,            // display how many minutes the line is behind schedule
+    addDelay: true,             // add the delay to the scheduled departure time
+    fade: true,                 // fade out future items
+    fadePoint: 0.25,            // start fading after 25 percent of the list
+```
+
 ## Dependencies
 * instance of [MagicMirror²](https://github.com/MichMich/MagicMirror)
 * urlencode (linux: npm install urlencode)
@@ -226,3 +257,8 @@ config: {
 | `lineFiltering`.`active` | Flag to activate or deactivate line filtering <br> **Possible values:** `true` or `false` <br> **Default** `false`  |
 | `lineFiltering`.`filterType` | Whitelist or blacklist option lines from `lineFiltering`.`lineNumbers` <br> **Possible values:** `whitelist` or `blacklist` <br> **Default** `blacklist` |
 | `lineFiltering`.`lineNumbers` | lines that should be on the white-/blacklist <br> **Possible values** `["U1, U3, X50"]` <br> **Default value** `[]` |
+| `showIcons` | If the line icons should be shown.<br> **Possible values:** `true` or `false` <br> **Default:** `true` |
+| `showLineColors` | If the line numbers should be displayed with their color.<br> **Possible values:** `true` or `false` <br> **Default:** `true` |
+| `iconOpacity` | Brightness of the line icons and colors.<br> **Possible values:** from `0.0` to `1.0` <br> **Default:** `1.0` |
+| `fade` | If the schedule should slowly fade out.<br> **Possible values:** `true` or `false` <br> **Default:** `true` |
+| `fadePoint` | The starting fraction, after which fading should start.<br> **Possible values:** from `0.0` to `1.0` <br> **Default:** `0.25` |

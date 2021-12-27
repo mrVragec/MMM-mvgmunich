@@ -30,6 +30,10 @@ Module.register("mvgmunich", {
 		trainDepartureTimeFormat: "relative",
 		walkingTimeFormat: "relative",
 		showIcons: true,
+		showLineColors: true,
+		iconOpacity: 1,
+		fade: true,
+		fadePoint: 0.25,
 		transportTypesToShow: {
 			"ubahn": true,
 			"sbahn": true,
@@ -85,7 +89,7 @@ Module.register("mvgmunich", {
 			return wrapperTable;
 		}
 
-		if (this.resultData === []) {
+		if (!this.resultData.hasOwnProperty(this.config.haltestelle)) {
 			wrapperTable.className = "dimmed light small";
 			wrapperTable.innerHTML = "Loading data from MVG ...";
 			return wrapperTable;
@@ -101,6 +105,23 @@ Module.register("mvgmunich", {
 
 		let visibleLines = 0;
 		const interruptions = new Set();
+
+		if (this.config.addDelay) {
+			// add delay to departure time
+			for (let i = 0; i < jsonObject.departures.length; i++) {
+				let delay = parseInt(jsonObject.departures[i].delay);
+				if (!isNaN(delay)) {
+					jsonObject.departures[i].departureTime += delay * MS_PER_MINUTE;
+				}
+			}
+			// sort by real departure time
+			jsonObject.departures.sort(function(a,b) { return a.departureTime - b.departureTime; });
+		}
+
+		// calculate fade steps
+		const fadeStart = this.config.maxEntries * this.config.fadePoint;
+		const fadeSteps = this.config.maxEntries - fadeStart;
+		let fadeNum = 0;
 
 		for (let i = 0; i < jsonObject.departures.length; i++) {
 			if (visibleLines >= this.config.maxEntries) {
@@ -119,15 +140,35 @@ Module.register("mvgmunich", {
 				continue;
 			}
 
-			if (this.config.showInterruptions && this.isLineAffected(apiResultItem.label)) {
-				htmlText += "<tr class='gray'>";
-			} else {
-				htmlText += "<tr class='normal'>";
+			// calculate row opacity
+			let opacity = 1;
+			if (this.config.fade) {
+				if (fadeNum >= fadeStart) {
+					opacity = 1 - (fadeNum - fadeStart) / fadeSteps;
+				}
+				fadeNum ++;
 			}
-			// check if user want's icons
-			htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
+
+			if (this.config.showInterruptions && this.isLineAffected(apiResultItem.label)) {
+				htmlText += "<tr class='gray'";
+			} else {
+				htmlText += "<tr class='normal'";
+			}
+			htmlText += " style='opacity:" + opacity + "'>";
+
+			htmlText += "<td style='opacity:" + this.config.iconOpacity + "'>";
+			if (this.config.showLineColors) {
+				// colorize with line color
+				htmlText += "<span style='color:white;background-color:" + apiResultItem.lineBackgroundColor + "' class='icon'>";
+			} else {
+				htmlText += "<span class='icon'>";
+			}
+			if (this.config.showIcons) {
+				// add icon
+				htmlText += "<img src='" + this.data.path + "/resources/" + apiResultItem.product.toLocaleLowerCase() + ".svg'> ";
+			}
 			// add transport number
-			htmlText += "<td>" + apiResultItem.label + "</td>";
+			htmlText += "<span>" + apiResultItem.label + "</span></span></td>";
 			// add last station aka direction
 			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
 			// check if user want's to see departure time
@@ -184,15 +225,6 @@ Module.register("mvgmunich", {
    		}
 		return "";
 	},
-
-	showIcons: function (product, showIcons) {
-		let icons = "";
-		if (showIcons) {
-			icons = "<td class='" + product.toLocaleLowerCase() + "'></td>";
-		}
-		return icons;
-	}
-	,
 
 	showWalkingTime: function (departureTime) {
 		let htmlText = "";
@@ -252,7 +284,7 @@ Module.register("mvgmunich", {
 	// Override getHeader method.
 	getHeader: function () {
 		if (this.config.haltestelle !== "" || this.config.haltestelleName !== "") {
-			return this.data.header + " Munich: " +
+			return (this.data.header ? this.data.header + ": " : "") +
 				(this.config.haltestelleName === "" ? this.config.haltestelle : this.config.haltestelleName);
 		}
 		return "";
