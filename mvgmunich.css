@@ -59,3 +59,9 @@
 .mvgmunich td.timing {
     text-align: right;
 }
+
+.mvgmunich td.delay {
+    color: var(--color-text-dimmed);
+    vertical-align: top;
+    font-size: var(--font-size-small);
+}
