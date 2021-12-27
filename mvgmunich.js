@@ -27,6 +27,8 @@ Module.register("mvgmunich", {
 		timeToWalk: 0, 		// walking time to the station
 		showWalkingTime: false, // if the walking time should be included and the starting time is displayed
 		showTrainDepartureTime: true,
+		showDelay: false,
+		addDelay: true,
 		trainDepartureTimeFormat: "relative",
 		walkingTimeFormat: "relative",
 		showIcons: true,
@@ -102,6 +104,18 @@ Module.register("mvgmunich", {
 		let visibleLines = 0;
 		const interruptions = new Set();
 
+		if (this.config.addDelay) {
+			// add delay to departure time
+			for (let i = 0; i < jsonObject.departures.length; i++) {
+				let delay = parseInt(jsonObject.departures[i].delay);
+				if (!isNaN(delay)) {
+					jsonObject.departures[i].departureTime += delay * MS_PER_MINUTE;
+				}
+			}
+			// sort by real departure time
+			jsonObject.departures.sort(function(a,b) { return a.departureTime - b.departureTime; });
+		}
+
 		for (let i = 0; i < jsonObject.departures.length; i++) {
 			if (visibleLines >= this.config.maxEntries) {
 				break;
@@ -134,6 +148,8 @@ Module.register("mvgmunich", {
 			htmlText += this.showDepartureTime(apiResultItem.departureTime);
 			// check if user want's to see walking time
 			htmlText += this.showWalkingTime(apiResultItem.departureTime);
+			// check if user want's to see delay
+			htmlText += this.showDelay(apiResultItem.delay);
 			htmlText += "</tr>";
 			if (this.config.showInterruptionsDetails && this.isLineAffected(apiResultItem.label)) {
 				let interruption = this.getInterruptionsDetails(apiResultItem.label);
@@ -151,8 +167,8 @@ Module.register("mvgmunich", {
 	},
 
 	checkToIgnoreOrIncludeLine: function (lineName) {
-		return this.config.lineFiltering !== undefined 
-		&& this.config.lineFiltering.active 
+		return this.config.lineFiltering !== undefined
+		&& this.config.lineFiltering.active
 		&& (this.config.lineFiltering.filterType.localeCompare("whitelist") === 0 ?
 				!this.checkLineNumbersIncludes(lineName) : this.checkLineNumbersIncludes(lineName));
 	},
@@ -181,7 +197,7 @@ Module.register("mvgmunich", {
 					}
 				}
 			}
-   		}
+		}
 		return "";
 	},
 
@@ -226,6 +242,20 @@ Module.register("mvgmunich", {
 				htmlText += this.getRelativeTime(departureDate);
 			} else {
 				htmlText += "trainDepartureTimeFormat config is wrong";
+			}
+			htmlText += "</td>";
+		}
+		return htmlText;
+	}
+	,
+
+	showDelay: function (delay) {
+		let htmlText = "";
+		if (this.config.showDelay) {
+			// add delay
+			htmlText += "<td class='delay'>";
+			if (delay > 0) {
+				htmlText += "+" + delay;
 			}
 			htmlText += "</td>";
 		}

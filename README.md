@@ -218,6 +218,8 @@ config: {
 | `timeToWalk`      | Time to walk to the station from your current location <br> **Default:** `0` minutes |
 | `showWalkingTime`  | If the time to leave should be displayed which includes the walking time. <br> **Possible values:** `true` or `false` <br> **Default:** `false` |
 | `showTrainDepartureTime` | If the time of train departure should be displayed. <br> **Possible values:** `true` or `false` <br> **Default:** `true` |
+| `showDelay` | If the trains delay should be displayed.<br> **Possible values:** `true` or `false` <br> **Default:** `false` |
+| `addDelay` | If the trains delay should be added to the scheduled departure time.<br> **Possible values:** `true` or `false` <br> **Default:** `true` |
 | `trainDepartureTimeFormat` | Train departure time format. Absolute: 21:10; Relative: in 8 min; <br> **Possible values:** `relative` or `absolute` <br> **Default** `relative` |
 | `walkingTimeFormat` | Walking time format. Absolute: 21:08; Relative in 6 min; <br> **Possible values:** `relative` or `absolute` <br> **Default** `relative` |
 | `showInterruptions` | Gray-out lines with interruptions; <br> **Possible values:** `true` or `false` <br> **Default** `false` |
