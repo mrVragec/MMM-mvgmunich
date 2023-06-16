@@ -70,6 +70,17 @@ module.exports = NodeHelper.create({
 		const self = this;
 		request({
 			headers: globals,
+
+				/*
+				NEW API example:
+				curl --request GET --url 'https://www.mvg.de/api/fib/v2/departure?limit=10&offsetInMinutes=0&transportTypes=UBAHN%2CTRAM%2CBUS%2CSBAHN%2CSCHIFF&globalId=de%3A09184%3A490
+				Response looks different and cannot be adapted 1:1
+
+				It looks like we have to gather the globalId via 
+				curl --request GET --url 'https://www.mvg.de/api/fib/v2/location?query=garching'
+
+				*/
+
 			uri: stationQuery + urlencode(payload.haltestelle),
 			method: "GET",
 			gzip: true
