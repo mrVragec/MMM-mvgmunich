@@ -270,6 +270,7 @@ Module.register("mvgmunich", {
 			// 	this.config.haltestelleId = payload.haltestelleId;
 			// 	this.config.haltestelleName = payload.haltestelleName;
 			// }
+			this.config.globalId = payload.globalId;
 			this.getHeader();
 			this.getData();
 			break;

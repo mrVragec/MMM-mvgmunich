@@ -50,7 +50,7 @@ module.exports = NodeHelper.create({
 				limit:10,
 				offsetInMinutes:0,
 				transportTypes:'BUS,UBAHN,TRAM,SBAHN,SCHIFF',
-				globalId:'de:09162:6'
+				globalId: payload.globalId
 			},
 			method: "GET",
 			gzip: true
