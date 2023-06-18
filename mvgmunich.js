@@ -102,14 +102,14 @@ Module.register("mvgmunich", {
 		let visibleLines = 0;
 		const interruptions = new Set();
 
-		for (let i = 0; i < jsonObject.departures.length; i++) {
+		for (let i = 0; i < jsonObject.length; i++) {
 			if (visibleLines >= this.config.maxEntries) {
 				break;
 			}
 			// get one item from api result
-			const apiResultItem = jsonObject.departures[i];
+			const apiResultItem = jsonObject[i];
 			// get transport type
-			const transportType = apiResultItem.product.toLocaleLowerCase();
+			const transportType = apiResultItem.transportType.toLocaleLowerCase();
 
 			// check if we should show data of this transport type
 			if (!this.config.transportTypesToShow[transportType]
@@ -125,15 +125,15 @@ Module.register("mvgmunich", {
 				htmlText += "<tr class='normal'>";
 			}
 			// check if user want's icons
-			htmlText += this.showIcons(apiResultItem.product, this.config.showIcons);
+			htmlText += this.showIcons(apiResultItem.transportType, this.config.showIcons);
 			// add transport number
 			htmlText += "<td>" + apiResultItem.label + "</td>";
 			// add last station aka direction
 			htmlText += "<td class='stationColumn'>" + apiResultItem.destination + "</td>";
 			// check if user want's to see departure time
-			htmlText += this.showDepartureTime(apiResultItem.departureTime);
+			htmlText += this.showDepartureTime(apiResultItem.realtimeDepartureTime);
 			// check if user want's to see walking time
-			htmlText += this.showWalkingTime(apiResultItem.departureTime);
+			htmlText += this.showWalkingTime(apiResultItem.realtimeDepartureTime);
 			htmlText += "</tr>";
 			if (this.config.showInterruptionsDetails && this.isLineAffected(apiResultItem.label)) {
 				let interruption = this.getInterruptionsDetails(apiResultItem.label);

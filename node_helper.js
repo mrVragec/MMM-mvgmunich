@@ -41,35 +41,17 @@ module.exports = NodeHelper.create({
 		}
 	},
 
-	getStationId: function(name) {
-		request({
-			headers: globals,
-			uri: "https://www.mvg.de/api/fib/v2/location?query=" + name,
-			method: "GET",
-			gzip: true
-		}, function (error, response, body) {
-			if (error) {
-				// Error while reading departure data ...
-				console.error("Error while reading station info", error);
-				self.sendSocketNotification("ERROR", "Error while reading data: " + error.message);
-			} else {
-				// body is the decompressed response body
-				try {
-					return JSON.parse(body)[0].globalId;
-				} catch (e) {
-					console.error("Error while parsing and sending departure info", e);
-					self.sendSocketNotification("ERROR_NO_DEPARTURE_DATA", "");
-				}
-			}
-		});
-		
-	},
-
 	getDepartureInfo: function (payload) {
 		const self = this;
 		request({
 			headers: globals,
-			uri: apiBase + payload.haltestelleId + "?footway=" + payload.timeToWalk,
+			uri: "https://www.mvg.de/api/fib/v2/departure",
+			qs: {
+				limit:10,
+				offsetInMinutes:0,
+				transportTypes:'BUS,UBAHN,TRAM,SBAHN,SCHIFF',
+				globalId:'de:09162:6'
+			},
 			method: "GET",
 			gzip: true
 		}, function (error, response, body) {
@@ -94,20 +76,8 @@ module.exports = NodeHelper.create({
 		const self = this;
 		request({
 			headers: globals,
-
-				/*
-				NEW API example:
-				curl --request GET --url 'https://www.mvg.de/api/fib/v2/departure?limit=10&offsetInMinutes=0&transportTypes=UBAHN%2CTRAM%2CBUS%2CSBAHN%2CSCHIFF&globalId=de%3A09184%3A490
-				Response looks different and cannot be adapted 1:1
-
-				It looks like we have to gather the globalId via 
-				curl --request GET --url 'https://www.mvg.de/api/fib/v2/location?query=garching'
-
-				*/
-
-			uri: stationQuery + urlencode(payload.haltestelle),
-			// uri: stationQuery + urlencode(payload.haltestelle),
-			uri: "https://www.mvg.de/api/fib/v2/departure?limit=10&offsetInMinutes=0&transportTypes=UBAHN,TRAM,BUS,SBAHN,SCHIFF&globalId=de%3A09184%3A490",
+			uri: "https://www.mvg.de/api/fib/v2/location",
+			qs: {'query': payload.haltestelle},
 			method: "GET",
 			gzip: true
 		}, function (error, response, body) {
@@ -118,13 +88,13 @@ module.exports = NodeHelper.create({
 			} else {
 				// body is the decompressed response body
 				try {
-					console.log(body)
 					const jsonObject = JSON.parse(body);
-					if (jsonObject[0].id === undefined) {
+					if (jsonObject[0].globalId === undefined) {
 						self.sendSocketNotification("ERROR_NO_STATION", "");
 					} else {
-						payload.haltestelleId = jsonObject.locations[0].id;
-						payload.haltestelleName = jsonObject.locations[0].name;
+						payload.haltestelleId = jsonObject[0].globalId;
+						payload.globalId = jsonObject[0].globalId;
+						payload.haltestelleName = jsonObject[0].name;
 						self.sendSocketNotification("UPDATE_STATION", payload);
 					}
 				} catch (e) {
