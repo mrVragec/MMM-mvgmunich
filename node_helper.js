@@ -49,7 +49,7 @@ module.exports = NodeHelper.create({
 			qs: {
 				limit:10,
 				offsetInMinutes:0,
-				transportTypes:'BUS,UBAHN,TRAM,SBAHN,SCHIFF',
+				transportTypes: payload.transportTypes || Object.entries(payload.transportTypesToShow).filter(x => x[1]).map(x => x[0].toUpperCase()).join(","),
 				globalId: payload.globalId
 			},
 			method: "GET",
