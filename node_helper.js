@@ -21,8 +21,8 @@ const globals = {
 	"Accept-Language": "en-US,en;q=0.9,de;q=0.8"
 };
 const mvgAPI = "https://www.mvg.de/";
-const apiBase = mvgAPI + "api/fahrinfo/departure/";
-const stationQuery = mvgAPI + "api/fahrinfo/location/queryWeb?q=";
+const apiBase = mvgAPI + "api/fib/v2/departure";
+const stationQuery = mvgAPI + "api/fib/v2/location";
 const interruptionsURL = mvgAPI + ".rest/betriebsaenderungen/api/interruptions?_=";
 module.exports = NodeHelper.create({
 
@@ -45,7 +45,7 @@ module.exports = NodeHelper.create({
 		const self = this;
 		request({
 			headers: globals,
-			uri: "https://www.mvg.de/api/fib/v2/departure",
+			uri: apiBase,
 			qs: {
 				limit:10,
 				offsetInMinutes:0,
@@ -76,7 +76,7 @@ module.exports = NodeHelper.create({
 		const self = this;
 		request({
 			headers: globals,
-			uri: "https://www.mvg.de/api/fib/v2/location",
+			uri: stationQuery,
 			qs: {'query': payload.haltestelle},
 			method: "GET",
 			gzip: true
