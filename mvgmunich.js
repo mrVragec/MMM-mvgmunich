@@ -266,11 +266,11 @@ Module.register("mvgmunich", {
 			break;
 
 		case "UPDATE_STATION":
-			// if (this.config.haltestelle === payload.haltestelle) {
-			// 	this.config.haltestelleId = payload.haltestelleId;
-			// 	this.config.haltestelleName = payload.haltestelleName;
-			// }
-			this.config.globalId = payload.globalId;
+			if (this.config.haltestelle === payload.haltestelle) {
+				this.config.haltestelleId = payload.haltestelleId;
+				this.config.haltestelleName = payload.haltestelleName;
+				this.config.globalId = payload.globalId;
+			}
 			this.getHeader();
 			this.getData();
 			break;
