@@ -21,8 +21,8 @@ const globals = {
 	"Accept-Language": "en-US,en;q=0.9,de;q=0.8"
 };
 const mvgAPI = "https://www.mvg.de/";
-const apiBase = mvgAPI + "api/fahrinfo/departure/";
-const stationQuery = mvgAPI + "api/fahrinfo/location/queryWeb?q=";
+const apiBase = mvgAPI + "api/fib/v2/departure";
+const stationQuery = mvgAPI + "api/fib/v2/location";
 const interruptionsURL = mvgAPI + ".rest/betriebsaenderungen/api/interruptions?_=";
 module.exports = NodeHelper.create({
 
@@ -45,7 +45,13 @@ module.exports = NodeHelper.create({
 		const self = this;
 		request({
 			headers: globals,
-			uri: apiBase + payload.haltestelleId + "?footway=" + payload.timeToWalk,
+			uri: apiBase,
+			qs: {
+				limit: (payload.limit || payload.maxEntries || 10) + 5,
+				offsetInMinutes:0,
+				transportTypes: payload.transportTypes || Object.entries(payload.transportTypesToShow).filter(x => x[1]).map(x => x[0].toUpperCase()).join(","),
+				globalId: payload.globalId
+			},
 			method: "GET",
 			gzip: true
 		}, function (error, response, body) {
@@ -70,7 +76,8 @@ module.exports = NodeHelper.create({
 		const self = this;
 		request({
 			headers: globals,
-			uri: stationQuery + urlencode(payload.haltestelle),
+			uri: stationQuery,
+			qs: {'query': payload.haltestelle},
 			method: "GET",
 			gzip: true
 		}, function (error, response, body) {
@@ -82,11 +89,12 @@ module.exports = NodeHelper.create({
 				// body is the decompressed response body
 				try {
 					const jsonObject = JSON.parse(body);
-					if (jsonObject.locations[0].id === undefined) {
+					if (jsonObject[0].globalId === undefined) {
 						self.sendSocketNotification("ERROR_NO_STATION", "");
 					} else {
-						payload.haltestelleId = jsonObject.locations[0].id;
-						payload.haltestelleName = jsonObject.locations[0].name;
+						payload.haltestelleId = jsonObject[0].globalId;
+						payload.globalId = jsonObject[0].globalId;
+						payload.haltestelleName = jsonObject[0].name;
 						self.sendSocketNotification("UPDATE_STATION", payload);
 					}
 				} catch (e) {
