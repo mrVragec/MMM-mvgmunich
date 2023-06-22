@@ -47,7 +47,7 @@ module.exports = NodeHelper.create({
 			headers: globals,
 			uri: apiBase,
 			qs: {
-				limit: payload.limit || payload.maxEntries || 10,
+				limit: (payload.limit || payload.maxEntries || 10) + 5,
 				offsetInMinutes:0,
 				transportTypes: payload.transportTypes || Object.entries(payload.transportTypesToShow).filter(x => x[1]).map(x => x[0].toUpperCase()).join(","),
 				globalId: payload.globalId
